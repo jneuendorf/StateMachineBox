@@ -1,0 +1,122 @@
+.popup {
+  height: 400px;
+  left: 50%;
+  position: absolute !important;
+  top: 20%;
+  width: 800px; }
+  .popup .close {
+    cursor: pointer;
+    height: 25px;
+    position: absolute;
+    right: 25.5px;
+    top: 25.5px;
+    width: 25px; }
+  .popup .content {
+    background-color: white;
+    border: 1px solid black;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    left: -50%; }
+    .popup .content .header {
+      cursor: default;
+      font-size: 20px;
+      font-weight: 300;
+      height: 76px;
+      line-height: 76px;
+      padding: 0px 40px 0px 40px;
+      text-transform: uppercase;
+      width: 720px;
+      width: calc(100% - 80px); }
+      .popup .content .header .headline {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 95%; }
+    .popup .content .bodyWrapper {
+      box-sizing: border-box;
+      display: table;
+      font-size: 15px;
+      font-weight: normal;
+      height: calc(100% - 111px);
+      overflow: hidden;
+      padding: 0px;
+      width: 4000px; }
+      .popup .content .bodyWrapper .body {
+        display: table-cell;
+        float: left;
+        height: calc(100% - 20px);
+        padding: 10px 40px 10px 40px; }
+    .popup .content .navigation {
+      bottom: 35px;
+      height: 25px;
+      position: absolute;
+      text-align: center;
+      width: 100%; }
+      .popup .content .navigation .dot {
+        border-radius: 50%;
+        border-style: solid;
+        border-width: 2px;
+        cursor: pointer;
+        display: inline-block;
+        margin: 0 10px 0 auto;
+        height: 15px;
+        width: 15px; }
+        .popup .content .navigation .dot.selected {
+          background-color: #BBBBBB; }
+        .popup .content .navigation .dot:hover {
+          background-color: #DDDDDD; }
+    .popup .content .footer {
+      height: 35px;
+      padding: 0px;
+      width: 100%; }
+      .popup .content .footer .button {
+        color: white;
+        cursor: pointer;
+        float: right;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 35px;
+        height: 35px;
+        min-width: 120px;
+        position: relative;
+        text-align: center;
+        text-transform: uppercase; }
+  .popup .formatOption, .popup .titleOption, .popup .startOption, .popup .dateFormatOption, .popup .dateFormat.ok {
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
+    cursor: pointer;
+    display: inline-block;
+    margin: 9px 7px 0px 0px;
+    padding: 12px 20px;
+    text-align: center;
+    width: 30px; }
+    .popup .formatOption:hover, .popup .titleOption:hover, .popup .startOption:hover, .popup .dateFormatOption:hover, .popup .dateFormat.ok:hover {
+      background-color: #DDDDDD; }
+    .popup .formatOption.selected:hover, .popup .titleOption.selected:hover, .popup .startOption.selected:hover, .popup .dateFormatOption.selected:hover, .popup .dateFormat.ok.selected:hover {
+      background-color: #222222; }
+  .popup .startOption {
+    width: 75px; }
+  .popup .dateFormatOption {
+    font-size: 12px;
+    padding: 10px 5px;
+    width: 83px; }
+  .popup .dateFormatLabel {
+    margin: 10px 0px 0px 0px;
+    text-align: center; }
+  .popup .dateFormat.ok {
+    margin-left: 170px; }
+
+.popup.draggable .content .header {
+  cursor: move; }
+
+.popup.overlay {
+  background: rgba(255, 255, 255, 0.7);
+  height: 100%;
+  left: 0px;
+  position: fixed;
+  top: 0px;
+  width: 100%; }
+
+/*# sourceMappingURL=smb.css.map */
