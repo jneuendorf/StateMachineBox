@@ -1,0 +1,170 @@
+// imports variables.sass.erb
+// @import variables
+
+$popupWidth: 800px
+$popupHeight: 400px
+
+$headerHeight: 76px
+$navigationHeight: 25px
+$footerHeight: 35px
+
+$bodyWrapperHeight: #{$popupHeight - $headerHeight - $footerHeight}
+// -20px because of padding
+$bodyHeight: #{$bodyWrapperHeight - 20px}
+
+$hoverBGColor: #DDDDDD
+$selectedHoverBGColor: #222222
+
+.popup
+    height: $popupHeight
+    left: 50%
+    // !important needed for jqueryUI draggable
+    position: absolute !important
+    top: 20%
+    width: $popupWidth
+
+    .close
+        // @include icon(6)
+        cursor: pointer
+        height: 25px
+        position: absolute
+        right: 25.5px
+        top: 25.5px
+        width: 25px
+
+    .content
+        background-color: white
+        border: 1px solid black
+        height: 100%
+        overflow: hidden
+        position: relative
+        left: -50%
+
+        .header
+            cursor: default
+            font:
+                size: 20px
+                weight: 300
+            height: $headerHeight
+            line-height: $headerHeight
+            padding: 0px 40px 0px 40px
+            text-transform: uppercase
+            width: #{$popupWidth - 80px}
+            width: calc(100% - 80px)
+
+            .headline
+                overflow: hidden
+                text-overflow: ellipsis
+                white-space: nowrap
+                width: 95%
+        // see cursor style for draggable popup at bottom
+
+        .bodyWrapper
+            box-sizing: border-box
+            display: table
+            font:
+                size: 15px
+                weight: normal
+            // height: 228px
+            // height: $bodyWrapperHeight
+            height: calc(100% - #{$headerHeight + $footerHeight})
+            overflow: hidden
+            padding: 0px
+            width: 4000px
+            // width: 200%
+
+            .body
+                display: table-cell
+                float: left
+                // height: $bodyHeight
+                height: calc(100% - 20px)
+                padding: 10px 40px 10px 40px
+                // width: #{$popupWidth - 80px}
+                // width: calc(50% - 80px)
+                // width: 100%
+
+        .navigation
+            bottom: $footerHeight
+            height: $navigationHeight
+            position: absolute
+            text-align: center
+            // width: $popupWidth
+            width: 100%
+
+            .dot
+                border:
+                    radius: 50%
+                    style: solid
+                    width: 2px
+                cursor: pointer
+                display: inline-block
+                // margin: 0px auto
+                margin: 0 10px 0 auto
+                height: 15px
+                width: 15px
+                &.selected
+                    background-color: #BBBBBB
+                &:hover
+                    background-color: $hoverBGColor
+
+        .footer
+            height: $footerHeight
+            padding: 0px
+            width: 100%
+
+            .button
+                color: white
+                cursor: pointer
+                float: right
+                font:
+                    size: 15px
+                    weight: 400
+                line-height: $footerHeight
+                height: $footerHeight
+                min-width: 120px
+                position: relative
+                text-align: center
+                text-transform: uppercase
+
+
+    // STYLES FOR CUSTOM ELEMENTS THAT ARE RENDERED INTO POPUPS
+    .formatOption, .titleOption, .startOption, .dateFormatOption, .dateFormat.ok
+        border:
+            radius: 6px
+            style: solid
+            width: 1px
+        cursor: pointer
+        display: inline-block
+        margin: 9px 7px 0px 0px
+        padding: 12px 20px
+        text-align: center
+        width: 30px
+        &:hover
+            background-color: $hoverBGColor
+        &.selected:hover
+            background-color: $selectedHoverBGColor
+
+    .startOption
+        width: 75px
+
+    .dateFormatOption
+        font-size: 12px
+        padding: 10px 5px
+        width: 83px
+    .dateFormatLabel
+        margin: 10px 0px 0px 0px
+        text-align: center
+    .dateFormat.ok
+        margin-left: 170px
+
+.popup.draggable .content .header
+    cursor: move
+
+
+.popup.overlay
+    background: rgba(255, 255, 255, 0.7)
+    height: 100%
+    left: 0px
+    position: fixed
+    top: 0px
+    width: 100%

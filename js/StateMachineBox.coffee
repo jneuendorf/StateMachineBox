@@ -459,3 +459,7 @@ class window.StateMachineBox
         console.warn "StatePopup::change: Cannot go to '#{targetState}' from '#{@current}'! Use onFailure() to catch that!"
         @onFailure?("change")
         return @
+
+# extends StateMachineBox for different class/instance naming
+class SMB extends StateMachineBox
+    # constructor: () ->
