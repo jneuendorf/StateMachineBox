@@ -1,6 +1,9 @@
-class window.StateMachineBox
+DEBUG = true
 
-    CLASS = @
+###*
+* @class StateMachineBox
+*###
+class window.StateMachineBox
 
     @MODES =
         SINGLE: "single"
@@ -8,6 +11,9 @@ class window.StateMachineBox
     @MODE       = @MODES.SINGLE
     @FADE_TIME  = 180
     FADE_TIME   = @FADE_TIME
+
+    @DEFAULT_CSS_CLASS = "default"
+    DEFAULT_CSS_CLASS = DEFAULT_CSS_CLASS
 
     @BUTTON_ACTIONS =
         OK:     "CLOSE"
@@ -50,6 +56,41 @@ class window.StateMachineBox
 
     @_popups        = []
     @_activePopup   = null
+    # only required for checking locale settings
+    if DEBUG
+        @_localeKeys    = [
+            "ok"
+            "cancel"
+            "next"
+            "prev"
+        ]
+        # iso country codes (https://en.wikipedia.org/wiki/ISO_3166-1)
+        @_languageKeys  = [
+            "af", "ax", "al", "dz", "as", "ad", "ao", "ai", "aq", "ag", "ar", "am", "aw", "au", "at", "az",
+            "bs", "bh", "bd", "bb", "by", "be", "bz", "bj", "bm", "bt", "bo", "bq", "ba", "bw", "bv", "br", "io", "bn", "bg", "bf", "bi", "kh",
+            "cm", "ca", "cv", "ky", "cf", "td", "cl", "cn", "cx", "cc", "co", "km", "cg", "cd", "ck", "cr", "ci", "hr", "cu", "cw", "cy", "cz",
+            "dk", "dj", "dm", "do",
+            "ec", "eg", "sv", "gq", "er", "ee", "et", "fk", "fo", "fj", "fi", "fr",
+            "gf", "pf", "tf", "ga", "gm", "ge", "de", "gh", "gi", "gr", "gl", "gd", "gp", "gu", "gt", "gg", "gn", "gw", "gy",
+            "ht", "hm", "va", "hn", "hk", "hu", "is", "in", "id", "ir", "iq", "ie", "im", "il", "it",
+            "jm", "jp", "je", "jo", "kz", "ke", "ki", "kp", "kr", "kw", "kg",
+            "la", "lv", "lb", "ls", "lr", "ly", "li", "lt", "lu",
+            "mo", "mk", "mg", "mw", "my", "mv", "ml", "mt", "mh", "mq", "mr", "mu", "yt", "mx", "fm", "md", "mc", "mn", "me", "ms", "ma", "mz", "mm",
+            "na", "nr", "np", "nl", "nc", "nz", "ni", "ne", "ng", "nu", "nf", "mp", "no", "om",
+            "pk", "pw", "ps", "pa", "pg", "py", "pe", "ph", "pn", "pl", "pt", "pr",
+            "qa", "re", "ro", "ru", "rw", "bl",
+            "sh", "kn", "lc", "mf", "pm", "vc", "ws", "sm", "st", "sa", "sn", "rs", "sc", "sl", "sg", "sx", "sk", "si", "sb", "so", "za", "gs", "ss", "es", "lk", "sd", "sr", "sj", "sz", "se", "ch", "sy",
+            "tw", "tj", "tz", "th", "tl", "tg", "tk", "to", "tt", "tn", "tr", "tm", "tc", "tv",
+            "ug", "ua", "ae", "gb", "us", "um", "uy", "uz",
+            "vu", "ve", "vn", "vg", "vi", "wf", "eh", "ye", "zm", "zw"
+        ]
+
+    # TODO: i18n
+    @locale =
+        en: {}
+        de: {}
+
+
 
     @getTopMost = () ->
         popups = @_popups
@@ -68,26 +109,46 @@ class window.StateMachineBox
     @getActive: () ->
         return @_activePopup or @getTopMost()
 
+    @setLocale: (language, values) ->
+        if DEBUG
+            if language in @_languageKeys
+                for key in @_localeKeys when not values[key]?
+                    throw new Error("StateMachineBox.setLocale: Missing at least 1 key '#{key}' for locale settings!")
+
+                @locale[language] = values
+                return @
+            throw new Error("StateMachineBox.setLocale: Invalid language '#{language}' given!")
+
+        @locale[language] = values
+        return @
+
+    @getLocale: (language, key) ->
+        if DEBUG
+            if @locale[language]?[key]?
+                return @locale[language][key]
+            throw new Error("StateMachineBox.getLocale: language '#{language}' not set or key '#{key}' not found!")
+        return @locale[language][key] or null
+
     @registerPopup: (popup) ->
         if popup not in @_popups
             @_popups.push popup
         return @
 
     @unregisterPopup: (popup) ->
-        idx = @_popups.indexOf popup
-        if idx >= 0
-            @_popups = (p for p in @_popups when i isnt idx)
+        @_popups = (p for p, i in @_popups when p isnt popup)
         return @
 
+    ############################################################################################################
     # CONSTRUCTOR
     constructor: (stateMachineConfig, headline, options = {}) ->
-        if not stateMachineConfig? or not stateMachineConfig.events?
-            throw new Error("StatePopup::constructor: No (valid) state machine configuration given!")
-        # check for naming collisions
-        for event in stateMachineConfig.events when @[event.name]?
-            throw new Error("StatePopup::constructor: Trying to create event '#{event.name}' but that property already exists in popup!!")
-        for callbackName, callback of stateMachineConfig.callbacks when @[callbackName]?
-            throw new Error("StatePopup::constructor: Trying to create callback '#{callbackName}' but that property already exists in popup!!")
+        if DEBUG
+            if not stateMachineConfig? or not stateMachineConfig.events?
+                throw new Error("StateMachineBox::constructor: No (valid) state machine configuration given!")
+            # check for naming collisions
+            for event in stateMachineConfig.events when @[event.name]?
+                throw new Error("StateMachineBox::constructor: Trying to create event '#{event.name}' but that property already exists in popup!!")
+            for callbackName, callback of stateMachineConfig.callbacks when @[callbackName]?
+                throw new Error("StateMachineBox::constructor: Trying to create callback '#{callbackName}' but that property already exists in popup!!")
 
         @headline           = headline
         @options            = options
@@ -102,8 +163,12 @@ class window.StateMachineBox
         @beforeNext         = options.beforeNext
         @beforePrev         = options.beforePrev
         @beforeChange       = options.beforeChange
-
         @onFailure          = options.onFailure
+
+        @theme              = options.theme or "default"
+        @locale             = options.locale or "en"
+        @showNavigation     = options.showNavigation or false
+        @container          = options.container or $(document.body)
 
         @data       = {}
 
@@ -138,11 +203,6 @@ class window.StateMachineBox
         #       \       /
         #       state1.2
         # can also be made linear => 2 options => initial -> state1.1 -> final OR initial -> state1.2 -> final
-        # this options also implies the existence of the navigation bar
-        if stateMachineConfig.linearization?
-            @linearization = stateMachineConfig.linearization
-        else
-            @linearization = null
 
         @stateMachineConfig = stateMachineConfig
         @bodyWrapper        = null
@@ -168,7 +228,7 @@ class window.StateMachineBox
         @constructor.registerPopup(@)
 
     _setAsActive: () ->
-        @_setActive(@)
+        @constructor._setActive(@)
         return @
 
     show: (callback) ->
@@ -197,8 +257,8 @@ class window.StateMachineBox
 
     # ACTION STUFF
     fireAction: (name, params...) ->
-        name = name.upper()
-        if (action = CLASS.ACTIONS[name])?
+        name = name.toUpperCase()
+        if (action = @constructor.ACTIONS[name])?
             return action.apply(@, params)
         throw new Error("Popup::fireAction: No action with name '#{name}' found!")
 
@@ -215,7 +275,7 @@ class window.StateMachineBox
             self.overlay.remove()
             return true
 
-        @_popups = @_popups.except @
+        @constructor.unregisterPopup(@)
 
         if not ignoreCallback
             @onClose?()
@@ -230,7 +290,7 @@ class window.StateMachineBox
         content = @contents[to]
 
         if not content?
-            throw new Error("StatePopup::changeContent: No content given for '#{to}'!")
+            throw new Error("StateMachineBox::changeContent: No content given for '#{to}'!")
 
         if not @bodyWrapper?
             @bodyWrapper = @div.find(".bodyWrapper")
@@ -269,18 +329,13 @@ class window.StateMachineBox
                         return true
                 )
 
-
-        if not @navigation.hasClass "hidden"
-            @navigation.find(".companyBGColorForce").switchClass "companyBGColorForce", "", 200
-            @navigation.find(".dot").eq(idx).switchClass "", "companyBGColorForce", 200
-
         return @
 
     currentContent: () ->
         return @contents[@current]
 
     draw: () ->
-        if CLASS.MODE is CLASS.MODES.SINGLE and CLASS.getActive()?
+        if @constructor.MODE is @constructor.MODES.SINGLE and @constructor.getActive()?
             console.warn "Popup::draw: tried to draw more than 1 popup but mode is set to 'single'!"
             return @
 
@@ -324,14 +379,14 @@ class window.StateMachineBox
             action = null
             # just button key => use default
             if typeof button is "string"
-                b = button.upper()
-                button = CLASS.BUTTONS[b]
-                action = CLASS.ACTIONS[CLASS.BUTTON_ACTIONS[b]]
+                b = button.toUpperCase()
+                button = @constructor.BUTTONS[b]
+                action = @constructor.ACTIONS[@constructor.BUTTON_ACTIONS[b]]
             # special config given => use that config
             else if button.button? and button.action?
                 b = button
-                button = CLASS.BUTTONS[b.button.upper()]
-                action = CLASS.ACTIONS[b.action.upper()]
+                button = @constructor.BUTTONS[b.button.toUpperCase()]
+                action = @constructor.ACTIONS[b.action.toUpperCase()]
             # invalid
             else
                 console.warn "Invalid button configuration for Popup!"
@@ -339,7 +394,7 @@ class window.StateMachineBox
 
             if action?
                 button = $ button
-                lastColor = CLASS.BUTTON_COLORS[idx]
+                lastColor = @constructor.BUTTON_COLORS[idx]
                 button.css {
                     "background-color": lastColor
                 }
@@ -354,24 +409,8 @@ class window.StateMachineBox
 
         self = @
 
-        # linearizable => draw navigation bar
-        # if @linearization?
-        #     navigation  = @navigation
-        #     dot         = $ """<div class="dot companyBorderColor" />"""
-        #     for idx in [0...@linearization.length]
-        #         do (idx) ->
-        #             navigation.append dot.clone().attr("data-state-idx", idx).click () ->
-        #                 prevSelectedDot = $(@).siblings(".companyBGColorForce")
-        #                 for ...
-        #                 if self.change(idx) isnt false
-        #                     $(@).switchClass("", "companyBGColorForce", 200)
-        #                         .siblings(".companyBGColorForce")
-        #                         .switchClass("companyBGColorForce", "", 200)
-        #                 return true
-        #     # highlight first nav dot
-        #     navigation.find(".dot").eq(0).addClass("companyBGColorForce")
-
-        @navigation.addClass "hidden"
+        if not @showNavigation
+            @navigation.addClass "hidden"
 
         @init()
 
@@ -379,24 +418,24 @@ class window.StateMachineBox
         content = @contents[@current]
 
         if not content?
-            throw new Error("StatePopup::draw: No content found for '#{@current}'!")
+            throw new Error("StateMachineBox::draw: No content found for '#{@current}'!")
 
         body = $ """<div class="body" style="width: #{@bodyWidth - @bodyPadding.left - @bodyPadding.right}px;" />"""
         body.append content
         @bodyWrapper.append body
 
-        if CLASS.MODE is CLASS.MODES.MANY
+        if @constructor.MODE is @constructor.MODES.MANY
             @div
                 .draggable {
                     handle: ".header"
                 }
                 .addClass "draggable"
-        else if CLASS.MODE is CLASS.MODES.SINGLE
-            $(document.body).append @overlay.click () ->
+        else if @constructor.MODE is @constructor.MODES.SINGLE
+            @container.append @overlay.click () ->
                 self.fireAction("cancel")
                 return true
 
-        $(document.body).append @div
+        @container.append @div
         @_setAsActive()
 
         return @
@@ -426,11 +465,11 @@ class window.StateMachineBox
             return @
 
         if foundEvents.length is 0
-            console.warn "StatePopup::next: There is no event for '#{@current}'! Can't go any further! Use onFailure() to catch that!"
+            console.warn "StateMachineBox::next: There is no event for '#{@current}'! Can't go any further! Use onFailure() to catch that!"
             @onFailure?("next")
             return @
 
-        console.warn "StatePopup::next: More than 1 event for '#{@current}': [#{event.name for event in foundEvents}]! Can't decide where to go! Use onFailure() to catch that!"
+        console.warn "StateMachineBox::next: More than 1 event for '#{@current}': [#{event.name for event in foundEvents}]! Can't decide where to go! Use onFailure() to catch that!"
         @onFailure?("next")
         return @
 
@@ -441,7 +480,7 @@ class window.StateMachineBox
             @back()
             return @
         catch e
-            console.warn "StatePopup::prev: Cannot go to 'prev' because no back route was defined! Define it with '{ name: 'back', from: 'prevState', to: 'returnState' }' ;) Use onFailure() to catch that!"
+            console.warn "StateMachineBox::prev: Cannot go to 'prev' because no back route was defined! Define it with '{ name: 'back', from: 'prevState', to: 'returnState' }' ;) Use onFailure() to catch that!"
             console.warn e
             @onFailure?("prev")
             return @
@@ -456,7 +495,7 @@ class window.StateMachineBox
                 @onChange.call(@, event.from, targetState)
             return @
 
-        console.warn "StatePopup::change: Cannot go to '#{targetState}' from '#{@current}'! Use onFailure() to catch that!"
+        console.warn "StateMachineBox::change: Cannot go to '#{targetState}' from '#{@current}'! Use onFailure() to catch that!"
         @onFailure?("change")
         return @
 
