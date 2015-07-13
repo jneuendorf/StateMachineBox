@@ -5,15 +5,15 @@
         "version": "0.0.1"
     },
     "files": {
-        "js_includes/jasmine/boot.js": {
-            "name": "js_includes/jasmine/boot.js",
+        "StateMachineBox.js": {
+            "name": "StateMachineBox.js",
             "modules": {},
             "classes": {},
             "fors": {},
             "namespaces": {}
         },
-        "StateMachineBox.js": {
-            "name": "StateMachineBox.js",
+        "StateMachineBox.prod.js": {
+            "name": "StateMachineBox.prod.js",
             "modules": {},
             "classes": {
                 "StateMachineBox": 1
@@ -32,142 +32,492 @@
             "extensions": [],
             "plugin_for": [],
             "extension_for": [],
-            "file": "StateMachineBox.js",
-            "line": 12
+            "file": "StateMachineBox.prod.js",
+            "line": 3,
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "stateMachineConfig",
+                    "description": "",
+                    "type": "Object"
+                },
+                {
+                    "name": "headline",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "options",
+                    "description": "",
+                    "type": "Object"
+                }
+            ]
         }
     },
     "classitems": [
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 1,
-            "description": "Starting with version 2.0, this file \"boots\" Jasmine, performing all of the necessary initialization before executing the loaded environment and all of a project's specs. This file should be loaded after `jasmine.js` and `jasmine_html.js`, but before any project source files or spec files are loaded. Thus this file can also be used to customize Jasmine for a project.\n\nIf a project is using Jasmine via the standalone distribution, this file can be customized directly. If a project is using Jasmine via the [Ruby gem][jasmine-gem], this file can be copied into the support directory via `jasmine copy_boot_js`. Other environments (e.g., Python) will have different mechanisms.\n\nThe location of `boot.js` can be specified and/or overridden in `jasmine.yml`.\n\n[jasmine-gem]: http://github.com/pivotal/jasmine-gem",
+            "file": "StateMachineBox.js",
+            "line": 102,
+            "description": "This method initializes the StateMachineBox class. For example the default locales are set.",
+            "static": 1,
+            "access": "public",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "init",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 13,
-            "description": "## Require &amp; Instantiate\n\nRequire Jasmine's core files. Specifically, this requires and attaches all of Jasmine's code to the `jasmine` reference.",
+            "file": "StateMachineBox.js",
+            "line": 129,
+            "description": "This method finds out which StateMachineBox instance is the front most.\nIt doesn't work if custom styles or css classes are set.",
+            "static": 1,
+            "access": "public",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "getTopMost",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 20,
-            "description": "Since this is being run in a browser and the results should populate to an HTML page, require the HTML-specific Jasmine code, injecting the same reference.",
+            "file": "StateMachineBox.js",
+            "line": 151,
+            "description": "This method finds out which StateMachineBox instance is the front most.\nIt doesn't work if custom styles or css classes are set.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "getTopMost",
+            "params": [
+                {
+                    "name": "popup",
+                    "description": "",
+                    "type": "StateMachineBox"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 25,
-            "description": "Create the Jasmine environment. This is used to run all specs in a project.",
+            "file": "StateMachineBox.js",
+            "line": 169,
+            "description": "This method returns the active StateMachineBox instance or the front most (if none are active).",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "getActive",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 30,
-            "description": "## The Global Interface\n\nBuild up the functions that will be exposed as the Jasmine public interface. A project can customize, rename or alias any of these functions as desired, provided the implementation remains unchanged.",
+            "file": "StateMachineBox.js",
+            "line": 183,
+            "description": "This method sets the locale information for a specific language. This information will be updated in all StateMachineBox'es by default.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "setLocale",
+            "params": [
+                {
+                    "name": "language",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "values",
+                    "description": "\nThis object should have a key for each element in StateMachineBox._localeKeys. Errors depend on debug mode.",
+                    "type": "Object"
+                },
+                {
+                    "name": "redraw",
+                    "description": "\nOptional. Default is true. If not true no instance of StateMachineBox will be updated.",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 37,
-            "description": "Add all of the Jasmine global/public interface to the global scope, so a project can use the public interface directly. For example, calling `describe` in specs instead of `jasmine.getEnv().describe`.",
+            "file": "StateMachineBox.js",
+            "line": 234,
+            "description": "This method gets the locale value for a given language and and a given key. If no key is specified this method returns the data object for the given language.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "getLocale",
+            "params": [
+                {
+                    "name": "language",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "key",
+                    "description": "\nOptional. Default resolves to all data. If given should match a key in StateMachineBox._languageKeys.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "String"
+            },
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 42,
-            "description": "## Runner Parameters\n\nMore browser specific code - wrap the query string in an object and to allow for getting/setting parameters from the runner user interface.",
+            "file": "StateMachineBox.js",
+            "line": 265,
+            "description": "This method can be used to remove unneeded locale data from the memory.",
+            "static": 1,
+            "itemtype": "method",
+            "name": "deleteLocale",
+            "params": [
+                {
+                    "name": "language",
+                    "description": "",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 58,
-            "description": "## Reporters\nThe `HtmlReporter` builds all of the HTML UI for the runner page. This reporter paints the dots, stars, and x's for specs, as well as all spec names and all failures (if any).",
+            "file": "StateMachineBox.js",
+            "line": 289,
+            "description": "This method can be used to add a StateMachineBox to the list of registered instances.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "_registerPopup",
+            "params": [
+                {
+                    "name": "popup",
+                    "description": "",
+                    "type": "StateMachineBox"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 73,
-            "description": "The `jsApiReporter` also receives spec results, and is used by any environment that needs to extract the results  from JavaScript.",
+            "file": "StateMachineBox.js",
+            "line": 308,
+            "description": "This method can be used to remove a StateMachineBox from the list of registered instances.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "_unregisterPopup",
+            "params": [
+                {
+                    "name": "popup",
+                    "description": "",
+                    "type": "StateMachineBox"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 79,
-            "description": "Filter which specs will be run by matching the start of the full name against the `spec` query param.",
+            "file": "StateMachineBox.js",
+            "line": 434,
+            "description": "This method sets the current StateMachineBox instance as currently active.",
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "_setAsActive",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 90,
-            "description": "Setting up timing functions to be able to be overridden. Certain browsers (Safari, IE 8, phantomjs) require this hack.",
+            "file": "StateMachineBox.js",
+            "line": 449,
+            "description": "This method show the instance's div.",
+            "itemtype": "method",
+            "name": "show",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 98,
-            "description": "## Execution\n\nReplace the browser window's `onload`, ensure it's called, and then run all of the loaded specs. This includes initializing the `HtmlReporter` instance and then executing the loaded Jasmine environment. All of this will happen after all of the specs are loaded.",
+            "file": "StateMachineBox.js",
+            "line": 463,
+            "description": "This method hides the instance's div.",
+            "itemtype": "method",
+            "name": "hide",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         },
         {
-            "file": "js_includes/jasmine/boot.js",
-            "line": 113,
-            "description": "Helper function for readability above.",
+            "file": "StateMachineBox.js",
+            "line": 477,
+            "description": "This method shows the instance's overlay.",
+            "itemtype": "method",
+            "name": "showOverlay",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 491,
+            "description": "This method hides the instance's overlay.",
+            "itemtype": "method",
+            "name": "hideOverlay",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 505,
+            "description": "This method shows the instance's ajax loader.",
+            "itemtype": "method",
+            "name": "showLoader",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 519,
+            "description": "This method hides the instance's ajax loader.",
+            "itemtype": "method",
+            "name": "hideLoader",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 533,
+            "description": "This method triggers an action (one of StateMachineBox.ACTIONS).\nThose actions are a subset of all events.",
+            "itemtype": "method",
+            "name": "fireAction",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "\nThe name of the action.",
+                    "type": "String"
+                },
+                {
+                    "name": "params...",
+                    "description": "\nOptional. Any parameter will be passed to the action.",
+                    "type": "Mixed"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Mixed"
+            },
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 559,
+            "description": "This method hides the instance's ajax loader.",
+            "itemtype": "method",
+            "name": "close",
+            "params": [
+                {
+                    "name": "ignoreCallback",
+                    "description": "\nOptional. Default is false. Indicates if the beforeClose and onClose callbacks will be called.",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 596,
+            "description": "Synonym for close.",
+            "itemtype": "method",
+            "name": "remove",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 607,
+            "description": "This method hides the instance's ajax loader.",
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "_changeContent",
+            "params": [
+                {
+                    "name": "event",
+                    "description": "\nThe name of the event which causes the content to change.",
+                    "type": "String"
+                },
+                {
+                    "name": "from",
+                    "description": "\nThe name of the state that we're coming from.",
+                    "type": "String"
+                },
+                {
+                    "name": "to",
+                    "description": "\nThe name of the state that we're going to.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 653,
+            "description": "This method returns the content associated with the current state.",
+            "itemtype": "method",
+            "name": "currentContent",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 666,
+            "description": "This method draws the StateMachineBox instance to the DOM.",
+            "itemtype": "method",
+            "name": "draw",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 765,
+            "description": "This method redraws the StateMachineBox instance.\nThis does not actually redraw everything but resets the texts of elemnts containing locale data.",
+            "itemtype": "method",
+            "name": "redraw",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 786,
+            "description": "This method triggers an event. If the event is invalid for the current state onFailure will be called.\nThis method might seem a bit unnecessary but implicit event function calls might appear weird and this method has better error reporting.",
+            "itemtype": "method",
+            "name": "fireEvent",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "\nThe name of the event to trigger.",
+                    "type": "String"
+                },
+                {
+                    "name": "params...",
+                    "description": "\nOptional. Any parameter will be passed to the event callback.",
+                    "type": "Mixed"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 814,
+            "description": "This method is a convenience method for fireEvent. If the state allows only 1 event this method will trigger that event.",
+            "itemtype": "method",
+            "name": "next",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 862,
+            "description": "This method is a convenience method for fireEvent (just like next). The difference here is that the state machine has no direction so next and prev are indistinguishable. Therefore the state machine must have a 'back' event for all states that are supposed to allow prev.\nOnly if there is exactly 1 other state that has an event that changes to the current state, prev can be applied.",
+            "itemtype": "method",
+            "name": "prev",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
             "class": "StateMachineBox"
         }
     ],
-    "warnings": [
-        {
-            "message": "Missing item type\nStarting with version 2.0, this file \"boots\" Jasmine, performing all of the necessary initialization before executing the loaded environment and all of a project's specs. This file should be loaded after `jasmine.js` and `jasmine_html.js`, but before any project source files or spec files are loaded. Thus this file can also be used to customize Jasmine for a project.\n\nIf a project is using Jasmine via the standalone distribution, this file can be customized directly. If a project is using Jasmine via the [Ruby gem][jasmine-gem], this file can be copied into the support directory via `jasmine copy_boot_js`. Other environments (e.g., Python) will have different mechanisms.\n\nThe location of `boot.js` can be specified and/or overridden in `jasmine.yml`.\n\n[jasmine-gem]: http://github.com/pivotal/jasmine-gem",
-            "line": " js_includes/jasmine/boot.js:1"
-        },
-        {
-            "message": "Missing item type\n## Require &amp; Instantiate\n\nRequire Jasmine's core files. Specifically, this requires and attaches all of Jasmine's code to the `jasmine` reference.",
-            "line": " js_includes/jasmine/boot.js:13"
-        },
-        {
-            "message": "Missing item type\nSince this is being run in a browser and the results should populate to an HTML page, require the HTML-specific Jasmine code, injecting the same reference.",
-            "line": " js_includes/jasmine/boot.js:20"
-        },
-        {
-            "message": "Missing item type\nCreate the Jasmine environment. This is used to run all specs in a project.",
-            "line": " js_includes/jasmine/boot.js:25"
-        },
-        {
-            "message": "Missing item type\n## The Global Interface\n\nBuild up the functions that will be exposed as the Jasmine public interface. A project can customize, rename or alias any of these functions as desired, provided the implementation remains unchanged.",
-            "line": " js_includes/jasmine/boot.js:30"
-        },
-        {
-            "message": "Missing item type\nAdd all of the Jasmine global/public interface to the global scope, so a project can use the public interface directly. For example, calling `describe` in specs instead of `jasmine.getEnv().describe`.",
-            "line": " js_includes/jasmine/boot.js:37"
-        },
-        {
-            "message": "Missing item type\n## Runner Parameters\n\nMore browser specific code - wrap the query string in an object and to allow for getting/setting parameters from the runner user interface.",
-            "line": " js_includes/jasmine/boot.js:42"
-        },
-        {
-            "message": "Missing item type\n## Reporters\nThe `HtmlReporter` builds all of the HTML UI for the runner page. This reporter paints the dots, stars, and x's for specs, as well as all spec names and all failures (if any).",
-            "line": " js_includes/jasmine/boot.js:58"
-        },
-        {
-            "message": "Missing item type\nThe `jsApiReporter` also receives spec results, and is used by any environment that needs to extract the results  from JavaScript.",
-            "line": " js_includes/jasmine/boot.js:73"
-        },
-        {
-            "message": "Missing item type\nFilter which specs will be run by matching the start of the full name against the `spec` query param.",
-            "line": " js_includes/jasmine/boot.js:79"
-        },
-        {
-            "message": "Missing item type\nSetting up timing functions to be able to be overridden. Certain browsers (Safari, IE 8, phantomjs) require this hack.",
-            "line": " js_includes/jasmine/boot.js:90"
-        },
-        {
-            "message": "Missing item type\n## Execution\n\nReplace the browser window's `onload`, ensure it's called, and then run all of the loaded specs. This includes initializing the `HtmlReporter` instance and then executing the loaded Jasmine environment. All of this will happen after all of the specs are loaded.",
-            "line": " js_includes/jasmine/boot.js:98"
-        },
-        {
-            "message": "Missing item type\nHelper function for readability above.",
-            "line": " js_includes/jasmine/boot.js:113"
-        }
-    ]
+    "warnings": []
 }

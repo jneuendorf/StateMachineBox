@@ -13,7 +13,9 @@
   * @class StateMachineBox
   *
   * @constructor
-  *
+  * @param stateMachineConfig {Object}
+  * @param headline {String}
+  * @param options {Object}
   *
    */
 
@@ -37,10 +39,10 @@
     };
 
     StateMachineBox.BUTTONS = {
-      OK: "<div class=\"button ok\">ok</div>",
-      CANCEL: "<div class=\"button cancel\">cancel</div>",
-      NEXT: "<div class=\"button next\">next</div>",
-      PREV: "<div class=\"button prev\">prev</div>"
+      OK: "<div class=\"button ok locale\" data-langkey=\"ok\" />",
+      CANCEL: "<div class=\"button cancel locale\" data-langkey=\"cancel\" />",
+      NEXT: "<div class=\"button next locale\" data-langkey=\"next\" />",
+      PREV: "<div class=\"button prev locale\" data-langkey=\"prev\" />"
     };
 
     StateMachineBox.ACTIONS = {
@@ -61,8 +63,8 @@
         }
         return this;
       },
-      CHANGE: function(idx) {
-        return this.change(idx);
+      CHANGE: function(targetState) {
+        return this.change(targetState);
       },
       NEXT: function() {
         return this.next();
@@ -80,15 +82,32 @@
 
     if (DEBUG) {
       StateMachineBox._localeKeys = ["ok", "cancel", "next", "prev"];
-      StateMachineBox._languageKeys = ["aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az", "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs", "ca", "ce", "ch", "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz", "ee", "el", "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr", "fy", "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it", "iu", "ja", "jv", "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko", "kr", "ks", "ku", "kv", "kw", "ky", "la", "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv", "mg", "mh", "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my", "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv", "ny", "oc", "oj", "om", "or", "os", "pa", "pi", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "rw", "sa", "sc", "sd", "se", "sg", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw", "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw", "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh", "yi", "yo", "za", "zh", "zu"];
+      StateMachineBox._languageKeys = ["aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az", "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs", "ca", "ce", "ch", "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz", "ee", "el", "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr", "fy", "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it", "iu", "ja", "jv", "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko", "kr", "ks", "ku", "kv", "kw", "ky", "la", "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv", "mg", "mh", "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my", "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv", "ny", "oc", "oj", "om", "or", "os", "pa", "pi", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "rw", "sa", "sc", "sd", "se", "sg", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw", "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw", "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh", "yi", "yo", "za", "zh", "zu", "en-gb", "en-us", "en-ca", "en-au"];
     }
 
     StateMachineBox._$cache = {
       popup: $("<div class=\"popup\">\n    <div class=\"content\">\n        <div class=\"close\" />\n        <div class=\"loader\" />\n        <div class=\"header\">\n            <div class=\"headline\" />\n        </div>\n        <div class=\"bodyWrapper\" />\n        <div class=\"navigation\" />\n        <div class=\"footer\" />\n    </div>\n</div>"),
-      overlay: $("<div class=\"popup overlay\" />")
+      overlay: $("<div class=\"popup overlay\" />"),
+      buttons: {
+        ok: $("<div class=\"button ok\" data-langkey=\"ok\" />"),
+        cancel: $("<div class=\"button cancel\" data-langkey=\"cancel\" />"),
+        next: $("<div class=\"button next\" data-langkey=\"next\" />"),
+        prev: $("<div class=\"button prev\" data-langkey=\"prev\" />")
+      }
     };
 
     StateMachineBox.locale = {};
+
+
+    /**
+    * This method initializes the StateMachineBox class. For example the default locales are set.
+    * @static
+    * @public
+    * @method init
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.init = function() {
       this.setLocale("en", {
@@ -106,6 +125,17 @@
       return this;
     };
 
+
+    /**
+    * This method finds out which StateMachineBox instance is the front most.
+    * It doesn't work if custom styles or css classes are set.
+    * @static
+    * @public
+    * @method getTopMost
+    * @return {StateMachineBox}
+    *
+     */
+
     StateMachineBox.getTopMost = function() {
       var divs, j, len, popup, popups;
       popups = this._popups;
@@ -117,14 +147,53 @@
       return popups[divs.index(divs.filter(":visible:last"))] || null;
     };
 
+
+    /**
+    * This method finds out which StateMachineBox instance is the front most.
+    * It doesn't work if custom styles or css classes are set.
+    * @static
+    * @protected
+    * @method getTopMost
+    * @param popup {StateMachineBox}
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
     StateMachineBox._setActive = function(popup) {
       this._activePopup = popup;
       return this;
     };
 
+
+    /**
+    * This method returns the active StateMachineBox instance or the front most (if none are active).
+    * @static
+    * @protected
+    * @method getActive
+    * @return {StateMachineBox}
+    *
+     */
+
     StateMachineBox.getActive = function() {
       return this._activePopup || this.getTopMost();
     };
+
+
+    /**
+    * This method sets the locale information for a specific language. This information will be updated in all StateMachineBox'es by default.
+    * @static
+    * @protected
+    * @method setLocale
+    * @param language {String}
+    * @param values {Object}
+    * This object should have a key for each element in StateMachineBox._localeKeys. Errors depend on debug mode.
+    * @param redraw {Boolean}
+    * Optional. Default is true. If not true no instance of StateMachineBox will be updated.
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.setLocale = function(language, values, redraw) {
       var j, k, key, l, len, len1, len2, popup, ref, ref1, ref2;
@@ -151,13 +220,28 @@
         throw new Error("StateMachineBox.setLocale: Invalid language '" + language + "' given!");
       }
       this.locale[language] = values;
-      ref2 = this._popups;
-      for (l = 0, len2 = ref2.length; l < len2; l++) {
-        popup = ref2[l];
-        popup.redraw();
+      if (redraw === true) {
+        ref2 = this._popups;
+        for (l = 0, len2 = ref2.length; l < len2; l++) {
+          popup = ref2[l];
+          popup.redraw();
+        }
       }
       return this;
     };
+
+
+    /**
+    * This method gets the locale value for a given language and and a given key. If no key is specified this method returns the data object for the given language.
+    * @static
+    * @protected
+    * @method getLocale
+    * @param language {String}
+    * @param key {String}
+    * Optional. Default resolves to all data. If given should match a key in StateMachineBox._languageKeys.
+    * @return {String}
+    *
+     */
 
     StateMachineBox.getLocale = function(language, key) {
       var ref;
@@ -177,14 +261,62 @@
       return this.locale[language];
     };
 
-    StateMachineBox.registerPopup = function(popup) {
+
+    /**
+    * This method can be used to remove unneeded locale data from the memory.
+    * @static
+    * @method deleteLocale
+    * @param language {String}
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
+    StateMachineBox.deleteLocale = function(language) {
+      if (DEBUG) {
+        if (this.locale[language] != null) {
+          delete this.locale[language];
+        } else {
+          console.warn("StateMachineBox.deleteLocale: language '" + language + "' not set thus can't be deleted!");
+        }
+        return this;
+      }
+      delete this.locale[language];
+      return this;
+    };
+
+
+    /**
+    * This method can be used to add a StateMachineBox to the list of registered instances.
+    * @static
+    * @protected
+    * @method _registerPopup
+    * @param popup {StateMachineBox}
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
+    StateMachineBox._registerPopup = function(popup) {
       if (indexOf.call(this._popups, popup) < 0) {
         this._popups.push(popup);
       }
       return this;
     };
 
-    StateMachineBox.unregisterPopup = function(popup) {
+
+    /**
+    * This method can be used to remove a StateMachineBox from the list of registered instances.
+    * @static
+    * @protected
+    * @method _unregisterPopup
+    * @param popup {StateMachineBox}
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
+    StateMachineBox._unregisterPopup = function(popup) {
       var i, p;
       this._popups = (function() {
         var j, len, ref, results;
@@ -290,47 +422,125 @@
         if (self.beforeChange instanceof Function && self.beforeChange(to) === false) {
           return false;
         }
-        self.changeContent(event, from, to);
+        self._changeContent(event, from, to);
+        self.onChange(event, from, to);
         return true;
       };
       StateMachine.create(stateMachineConfig);
-      this.constructor.registerPopup(this);
+      this.constructor._registerPopup(this);
     }
+
+
+    /**
+    * This method sets the current StateMachineBox instance as currently active.
+    * @protected
+    * @method _setAsActive
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.prototype._setAsActive = function() {
       this.constructor._setActive(this);
       return this;
     };
 
+
+    /**
+    * This method show the instance's div.
+    * @method show
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
     StateMachineBox.prototype.show = function(callback) {
-      this.div.fadeIn(FADE_TIME, callback);
+      this.div.fadeIn(this.constructor.FADE_TIME, callback);
       return this;
     };
+
+
+    /**
+    * This method hides the instance's div.
+    * @method hide
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.prototype.hide = function(callback) {
-      this.div.fadeOut(FADE_TIME, callback);
+      this.div.fadeOut(this.constructor.FADE_TIME, callback);
       return this;
     };
+
+
+    /**
+    * This method shows the instance's overlay.
+    * @method showOverlay
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.prototype.showOverlay = function(callback) {
-      this.overlay.fadeIn(FADE_TIME, callback);
+      this.overlay.fadeIn(this.constructor.FADE_TIME, callback);
       return this;
     };
+
+
+    /**
+    * This method hides the instance's overlay.
+    * @method hideOverlay
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.prototype.hideOverlay = function(callback) {
-      this.overlay.fadeOut(FADE_TIME, callback);
+      this.overlay.fadeOut(this.constructor.FADE_TIME, callback);
       return this;
     };
+
+
+    /**
+    * This method shows the instance's ajax loader.
+    * @method showLoader
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.prototype.showLoader = function() {
-      this.loader.fadeIn(FADE_TIME);
+      this.loader.fadeIn(this.constructor.FADE_TIME);
       return this;
     };
 
+
+    /**
+    * This method hides the instance's ajax loader.
+    * @method hideLoader
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
     StateMachineBox.prototype.hideLoader = function() {
-      this.loader.fadeOut(FADE_TIME);
+      this.loader.fadeOut(this.constructor.FADE_TIME);
       return this;
     };
+
+
+    /**
+    * This method triggers an action (one of StateMachineBox.ACTIONS).
+    * Those actions are a subset of all events.
+    * @method fireAction
+    * @param name {string}
+    * The name of the action.
+    * @param params... {mixed}
+    * Optional. Any parameter will be passed to the action.
+    * @return {mixed}
+    *
+     */
 
     StateMachineBox.prototype.fireAction = function() {
       var action, name, params;
@@ -339,8 +549,22 @@
       if ((action = this.constructor.ACTIONS[name]) != null) {
         return action.apply(this, params);
       }
-      throw new Error("Popup::fireAction: No action with name '" + name + "' found!");
+      if (DEBUG) {
+        throw new Error("Popup::fireAction: No action with name '" + name + "' found!");
+      }
+      return null;
     };
+
+
+    /**
+    * This method hides the instance's ajax loader.
+    * @method close
+    * @param ignoreCallback {Boolean}
+    * Optional. Default is false. Indicates if the beforeClose and onClose callbacks will be called.
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.prototype.close = function(ignoreCallback) {
       var self;
@@ -359,7 +583,7 @@
         self.overlay.remove();
         return true;
       });
-      this.constructor.unregisterPopup(this);
+      this.constructor._unregisterPopup(this);
       if (!ignoreCallback) {
         if (typeof this.onClose === "function") {
           this.onClose();
@@ -368,16 +592,39 @@
       return this;
     };
 
+
+    /**
+    * Synonym for close.
+    * @method remove
+    *
+     */
+
     StateMachineBox.prototype.remove = function() {
       return this.close.apply(this, arguments);
     };
 
-    StateMachineBox.prototype.changeContent = function(event, from, to) {
+
+    /**
+    * This method hides the instance's ajax loader.
+    * @protected
+    * @method _changeContent
+    * @param event {String}
+    * The name of the event which causes the content to change.
+    * @param from {String}
+    * The name of the state that we're coming from.
+    * @param to {String}
+    * The name of the state that we're going to.
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
+    StateMachineBox.prototype._changeContent = function(event, from, to) {
       var body, content;
       body = $("<div class=\"body\" style=\"width: " + (this.bodyWidth - this.bodyPadding.left - this.bodyPadding.right) + "px;\" />");
       content = this.contents[to];
       if (content == null) {
-        throw new Error("StateMachineBox::changeContent: No content given for '" + to + "'!");
+        throw new Error("StateMachineBox::_changeContent: No content given for '" + to + "'!");
       }
       if (this.bodyWrapper == null) {
         this.bodyWrapper = this.div.find(".bodyWrapper");
@@ -402,9 +649,27 @@
       return this;
     };
 
+
+    /**
+    * This method returns the content associated with the current state.
+    * @method currentContent
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
     StateMachineBox.prototype.currentContent = function() {
       return this.contents[this.current];
     };
+
+
+    /**
+    * This method draws the StateMachineBox instance to the DOM.
+    * @method draw
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.prototype.draw = function() {
       var action, b, body, button, buttons, content, headlineDiv, idx, j, lastColor, len, self;
@@ -439,18 +704,22 @@
         action = null;
         if (typeof button === "string") {
           b = button.toUpperCase();
-          button = this.constructor.BUTTONS[b];
+          button = this.constructor._$cache.buttons[b].clone();
           action = this.constructor.ACTIONS[this.constructor.BUTTON_ACTIONS[b]];
         } else if ((button.button != null) && (button.action != null)) {
           b = button;
-          button = this.constructor.BUTTONS[b.button.toUpperCase()];
+          button = this.constructor._$cache.buttons[b.button.toUpperCase()].clone();
           action = this.constructor.ACTIONS[b.action.toUpperCase()];
-        } else {
-          console.warn("Invalid button configuration for Popup!");
-          continue;
+        } else if (DEBUG) {
+          button = null;
+        }
+        if (DEBUG) {
+          if (button == null) {
+            console.warn("Invalid button configuration for Popup!", this.options.buttons);
+            continue;
+          }
         }
         if (action != null) {
-          button = $(button);
           lastColor = this.constructor.BUTTON_COLORS[idx];
           button.css({
             "background-color": lastColor
@@ -492,9 +761,40 @@
       return this;
     };
 
+
+    /**
+    * This method redraws the StateMachineBox instance.
+    * This does not actually redraw everything but resets the texts of elemnts containing locale data.
+    * @method redraw
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
     StateMachineBox.prototype.redraw = function() {
+      var elems, key, ref, val;
+      elems = this.div.find(".locale");
+      ref = this.contructor.getLocale(this.locale);
+      for (key in ref) {
+        val = ref[key];
+        elems.filter("[data-langkey=\"" + key + "\"]").text(val);
+      }
       return this;
     };
+
+
+    /**
+    * This method triggers an event. If the event is invalid for the current state onFailure will be called.
+    * This method might seem a bit unnecessary but implicit event function calls might appear weird and this method has better error reporting.
+    * @method fireEvent
+    * @param name {String}
+    * The name of the event to trigger.
+    * @param params... {mixed}
+    * Optional. Any parameter will be passed to the event callback.
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
 
     StateMachineBox.prototype.fireEvent = function() {
       var name, params;
@@ -510,10 +810,19 @@
       return this;
     };
 
+
+    /**
+    * This method is a convenience method for fireEvent. If the state allows only 1 event this method will trigger that event.
+    * @method next
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
     StateMachineBox.prototype.next = function() {
       var event, foundEvents, j, len, ref;
       if (this.beforeNext instanceof Function && this.beforeNext() === false) {
-        return false;
+        return this;
       }
       foundEvents = [];
       ref = this.stateMachineConfig.events;
@@ -549,10 +858,20 @@
       return this;
     };
 
+
+    /**
+    * This method is a convenience method for fireEvent (just like next). The difference here is that the state machine has no direction so next and prev are indistinguishable. Therefore the state machine must have a 'back' event for all states that are supposed to allow prev.
+    * Only if there is exactly 1 other state that has an event that changes to the current state, prev can be applied.
+    * @method prev
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
     StateMachineBox.prototype.prev = function() {
       var e;
       if (this.beforePrev instanceof Function && this.beforePrev() === false) {
-        return false;
+        return this;
       }
       try {
         this.back();
@@ -566,30 +885,6 @@
         }
         return this;
       }
-    };
-
-    StateMachineBox.prototype.change = function(targetState) {
-      var event, j, len, ref;
-      if (this.beforeChange instanceof Function && this.beforeChange(idx) === false) {
-        return false;
-      }
-      ref = this.stateMachineConfig.events;
-      for (j = 0, len = ref.length; j < len; j++) {
-        event = ref[j];
-        if (!(event.from === this.current && event.to === targetState)) {
-          continue;
-        }
-        this.fireEvent(event.name);
-        if (this.onChange instanceof Function) {
-          this.onChange.call(this, event.from, targetState);
-        }
-        return this;
-      }
-      console.warn("StateMachineBox::change: Cannot go to '" + targetState + "' from '" + this.current + "'! Use onFailure() to catch that!");
-      if (typeof this.onFailure === "function") {
-        this.onFailure("change");
-      }
-      return this;
     };
 
     return StateMachineBox;
