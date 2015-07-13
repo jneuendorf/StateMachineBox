@@ -29,7 +29,7 @@ There are 3 files:
     * also no nice warnings
 
 Also there are multiple themes coming the StateMachineBox.
-They can be accessed directly after having included the StateMachineBox(min.).css.
+They can be accessed directly after having included the StateMachineBox(.min).css.
 Here are the themes:
 
 * default
@@ -52,10 +52,22 @@ See the [wiki](...)
 
 ## Requirements
 
-* [Sass](http://sass-lang.com/) (for building)
-* [CoffeeScript](http://coffeescript.org/) (for building)
-* [YUIDoc](http://) (for building documentation)
+### For using SMB
+
 * [jQuery](http://jquery.com/)
 * [jQuery UI](http://jqueryui.com/) (draggable)
 * [Javascript Finite State Machine](http://github.com/jakesgordon/javascript-state-machine)
+
+### For developing SMB
+
+* [CoffeeScript](http://coffeescript.org/) (for building)
+    * [Node.js](https://nodejs.org/)
 * [Jasmine](http://jasmine.github.io/) (for testing)
+* [Sass](http://sass-lang.com/) (for building)
+    * Ruby
+* [UglifyJS](https://github.com/mishoo/UglifyJS2) (for building / JS minization)
+    * [Node.js](https://nodejs.org/)
+* [YUI Compressor](https://github.com/yui/yuicompressor) (for building / CSS minization)
+    * Java
+* [YUIDoc](http://) (for building documentation)
+    * [Node.js](https://nodejs.org/)

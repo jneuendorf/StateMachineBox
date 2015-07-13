@@ -1,0 +1,10 @@
+{
+        "name": "StateMachineBox",
+        "description": "A lightweight web page popup based on a finite-state machine.",
+        "version": "0.0.1",
+        "options": {
+                "linkNatives": true,
+                "outdir": "doc",
+                "tabtospace": 4
+        }
+}

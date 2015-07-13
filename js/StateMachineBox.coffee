@@ -1,7 +1,8 @@
-DEBUG = true
-
 ###*
 * @class StateMachineBox
+*
+* @constructor
+*
 *###
 class window.StateMachineBox
 
@@ -10,10 +11,8 @@ class window.StateMachineBox
         MANY:   "many"
     @MODE       = @MODES.SINGLE
     @FADE_TIME  = 180
-    FADE_TIME   = @FADE_TIME
 
     @DEFAULT_CSS_CLASS = "default"
-    DEFAULT_CSS_CLASS = DEFAULT_CSS_CLASS
 
     @BUTTON_ACTIONS =
         OK:     "CLOSE"
@@ -64,33 +63,57 @@ class window.StateMachineBox
             "next"
             "prev"
         ]
-        # iso country codes (https://en.wikipedia.org/wiki/ISO_3166-1)
+        # iso language codes (https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
         @_languageKeys  = [
-            "af", "ax", "al", "dz", "as", "ad", "ao", "ai", "aq", "ag", "ar", "am", "aw", "au", "at", "az",
-            "bs", "bh", "bd", "bb", "by", "be", "bz", "bj", "bm", "bt", "bo", "bq", "ba", "bw", "bv", "br", "io", "bn", "bg", "bf", "bi", "kh",
-            "cm", "ca", "cv", "ky", "cf", "td", "cl", "cn", "cx", "cc", "co", "km", "cg", "cd", "ck", "cr", "ci", "hr", "cu", "cw", "cy", "cz",
-            "dk", "dj", "dm", "do",
-            "ec", "eg", "sv", "gq", "er", "ee", "et", "fk", "fo", "fj", "fi", "fr",
-            "gf", "pf", "tf", "ga", "gm", "ge", "de", "gh", "gi", "gr", "gl", "gd", "gp", "gu", "gt", "gg", "gn", "gw", "gy",
-            "ht", "hm", "va", "hn", "hk", "hu", "is", "in", "id", "ir", "iq", "ie", "im", "il", "it",
-            "jm", "jp", "je", "jo", "kz", "ke", "ki", "kp", "kr", "kw", "kg",
-            "la", "lv", "lb", "ls", "lr", "ly", "li", "lt", "lu",
-            "mo", "mk", "mg", "mw", "my", "mv", "ml", "mt", "mh", "mq", "mr", "mu", "yt", "mx", "fm", "md", "mc", "mn", "me", "ms", "ma", "mz", "mm",
-            "na", "nr", "np", "nl", "nc", "nz", "ni", "ne", "ng", "nu", "nf", "mp", "no", "om",
-            "pk", "pw", "ps", "pa", "pg", "py", "pe", "ph", "pn", "pl", "pt", "pr",
-            "qa", "re", "ro", "ru", "rw", "bl",
-            "sh", "kn", "lc", "mf", "pm", "vc", "ws", "sm", "st", "sa", "sn", "rs", "sc", "sl", "sg", "sx", "sk", "si", "sb", "so", "za", "gs", "ss", "es", "lk", "sd", "sr", "sj", "sz", "se", "ch", "sy",
-            "tw", "tj", "tz", "th", "tl", "tg", "tk", "to", "tt", "tn", "tr", "tm", "tc", "tv",
-            "ug", "ua", "ae", "gb", "us", "um", "uy", "uz",
-            "vu", "ve", "vn", "vg", "vi", "wf", "eh", "ye", "zm", "zw"
+            "aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az",
+            "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs",
+            "ca", "ce", "ch", "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz",
+            "ee", "el", "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr", "fy",
+            "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr", "ht", "hu", "hy", "hz",
+            "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it", "iu", "ja", "jv",
+            "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko", "kr", "ks", "ku", "kv", "kw", "ky",
+            "la", "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv",
+            "mg", "mh", "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my",
+            "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv", "ny", "oc", "oj", "om", "or", "os",
+            "pa", "pi", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "rw",
+            "sa", "sc", "sd", "se", "sg", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw",
+            "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw", "ty",
+            "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh", "yi", "yo", "za", "zh", "zu"
         ]
 
-    # TODO: i18n
-    @locale =
-        en: {}
-        de: {}
+    @_$cache =
+        popup:      $ """<div class="popup">
+                            <div class="content">
+                                <div class="close" />
+                                <div class="loader" />
+                                <div class="header">
+                                    <div class="headline" />
+                                </div>
+                                <div class="bodyWrapper" />
+                                <div class="navigation" />
+                                <div class="footer" />
+                            </div>
+                        </div>"""
+        overlay:    $ """<div class="popup overlay" />"""
 
+    @locale = {}
 
+    ############################################################################################################
+    # STATIC METHODS
+    @init: () ->
+        @setLocale "en", {
+            ok:     "ok"
+            cancel: "cancel"
+            next:   "next"
+            prev:   "previous"
+        }
+        @setLocale "de", {
+            ok:     "ok"
+            cancel: "abbrechen"
+            next:   "weiter"
+            prev:   "zurück"
+        }
+        return @
 
     @getTopMost = () ->
         popups = @_popups
@@ -109,25 +132,33 @@ class window.StateMachineBox
     @getActive: () ->
         return @_activePopup or @getTopMost()
 
-    @setLocale: (language, values) ->
+    @setLocale: (language, values, redraw = true) ->
         if DEBUG
             if language in @_languageKeys
                 for key in @_localeKeys when not values[key]?
                     throw new Error("StateMachineBox.setLocale: Missing at least 1 key '#{key}' for locale settings!")
 
                 @locale[language] = values
+                popup.redraw() for popup in @_popups
                 return @
             throw new Error("StateMachineBox.setLocale: Invalid language '#{language}' given!")
 
         @locale[language] = values
+        popup.redraw() for popup in @_popups
         return @
 
     @getLocale: (language, key) ->
         if DEBUG
             if @locale[language]?[key]?
                 return @locale[language][key]
+            if not key? and @locale[language]?
+                console.info "StateMachineBox.getLocale: No key given. Returning all keys for '#{language}'."
+                return @locale[language]
             throw new Error("StateMachineBox.getLocale: language '#{language}' not set or key '#{key}' not found!")
-        return @locale[language][key] or null
+
+        if key?
+            return @locale[language][key] or null
+        return @locale[language]
 
     @registerPopup: (popup) ->
         if popup not in @_popups
@@ -139,7 +170,12 @@ class window.StateMachineBox
         return @
 
     ############################################################################################################
-    # CONSTRUCTOR
+    # CONSTRUCTOR (+ PSEUDE CONSTRUCTORS)
+    @new: (stateMachineConfig, headline, options = {}) ->
+        return new @(stateMachineConfig, headline, options)
+
+    # TODO: optional passing of array of contents for linear states
+    # TODO: optional passing of differently structured stateMachineConfig: more automization so either events are implicit or states are implicit (depening on what the user might need)
     constructor: (stateMachineConfig, headline, options = {}) ->
         if DEBUG
             if not stateMachineConfig? or not stateMachineConfig.events?
@@ -172,8 +208,8 @@ class window.StateMachineBox
 
         @data       = {}
 
-        @div        = $ """<div class="popup onTop" />"""
-        @overlay    = $ """<div class="popup overlay onTop" />"""
+        @div        = @constructor._$cache.popup.clone()
+        @overlay    = @constructor._$cache.overlay.clone()
 
         if options.width? and options.height?
             @div.css {
@@ -285,6 +321,7 @@ class window.StateMachineBox
     remove: () ->
         return @close.apply(@, arguments)
 
+    # TODO; different animations: slide, fade, fade through color, immediat
     changeContent: (event, from, to) ->
         body = $ """<div class="body" style="width: #{@bodyWidth - @bodyPadding.left - @bodyPadding.right}px;" />"""
         content = @contents[to]
@@ -440,6 +477,11 @@ class window.StateMachineBox
 
         return @
 
+    # this does not actually redraw everything but rather the elements containing locale data
+    redraw: () ->
+
+        return @
+
     # EVENT (STATE MACHINE) STUFF
     # this might seem pointless but implicit function calls might appear weird (and here we have better error reporting)
     fireEvent: (name, params...) ->
@@ -499,6 +541,5 @@ class window.StateMachineBox
         @onFailure?("change")
         return @
 
-# extends StateMachineBox for different class/instance naming
-class SMB extends StateMachineBox
-    # constructor: () ->
+# set locale
+StateMachineBox.init()
