@@ -8,13 +8,32 @@
 *###
 class window.StateMachineBox
 
+    ###*
+    * This property defines what modes the StateMachineBox class can have.
+    * @final
+    * @static
+    * @property MODES
+    * @type Object
+    *###
     @MODES =
         SINGLE: "single"
         MANY:   "many"
-    @MODE       = @MODES.SINGLE
-    @FADE_TIME  = 180
-
-    @DEFAULT_CSS_CLASS = "default"
+    ###*
+    * This property defines the current mode of the StateMachineBox class.
+    * @static
+    * @property MODE
+    * @type String
+    * @default MODES.SINGLE
+    *###
+    @MODE = @MODES.SINGLE
+    ###*
+    * This property defines how fast fade-in and fade-out animations are.
+    * @static
+    * @property FADE_TIME
+    * @type Number
+    * @default 180
+    *###
+    @FADE_TIME = 180
 
     @BUTTON_ACTIONS =
         OK:     "CLOSE"
@@ -55,6 +74,23 @@ class window.StateMachineBox
         "#D3D5D3"
     ]
 
+    ###*
+    * This property defines all themes.
+    * @static
+    * @property THEMES
+    * @type Object
+    *###
+    @THEMES =
+        DEFAULT: "default"
+    ###*
+    * This property defines the current theme of the StateMachineBox class.
+    * @static
+    * @property _theme
+    * @type String
+    * @default THEMES.DEFAULT
+    *###
+    @_theme = @THEMES.DEFAULT
+
     @_popups        = []
     @_activePopup   = null
     # only required for checking locale settings
@@ -86,20 +122,23 @@ class window.StateMachineBox
         ]
 
     @_$cache =
-        popup:      $ """<div class="popup">
-                            <div class="content">
-                                <div class="close" />
-                                <div class="loader" />
-                                <div class="header">
-                                    <div class="headline" />
+        popup:      $ """<div class="smb">
+                            <div class="positioner">
+                                <div class="content">
+                                    <div class="loader" />
+                                    <div class="header">
+                                        <div class="headline smb_noselect" />
+                                    </div>
+                                    <div class="bodyWrapper" />
+                                    <div class="navigation" />
+                                    <div class="footer" />
                                 </div>
-                                <div class="bodyWrapper" />
-                                <div class="navigation" />
-                                <div class="footer" />
+                                <div class="close" />
                             </div>
                         </div>"""
-        overlay:    $ """<div class="popup overlay" />"""
+        overlay:    $ """<div class="overlay" />"""
         buttons:
+            raw:    $ """<div class="button raw" />"""
             ok:     $ """<div class="button ok" data-langkey="ok" />"""
             cancel: $ """<div class="button cancel" data-langkey="cancel" />"""
             next:   $ """<div class="button next" data-langkey="next" />"""
@@ -194,7 +233,8 @@ class window.StateMachineBox
                     throw new Error("StateMachineBox.setLocale: Missing at least 1 key '#{key}' for locale settings!")
 
                 @locale[language] = values
-                popup.redraw() for popup in @_popups
+                if redraw is true
+                    popup.redraw() for popup in @_popups
                 return @
             throw new Error("StateMachineBox.setLocale: Invalid language '#{language}' given!")
 
@@ -243,6 +283,31 @@ class window.StateMachineBox
             return @
 
         delete @locale[language]
+        return @
+
+    @addTheme: (theme) ->
+        if DEBUG
+            if not @THEMES[theme]?
+                if theme isnt theme.toUpperCase()
+                    console.warn "StateMachineBox.addTheme: For consistency it is recommended to use upper case theme names. Theme '#{theme}' will be set anyways."
+                @THEMES[theme] = theme
+            throw new Error("StateMachineBox.addTheme: Theme '#{theme}' already exists!")
+
+        @THEMES[theme] = theme
+        return @
+
+    @setTheme: (theme, redraw = true) ->
+        if DEBUG
+            if @THEMES[theme]?
+                @_theme = @THEMES[theme]
+                if redraw is true
+                    popup.setTheme(@_theme) for popup in @_popups
+                return @
+            throw new Error("StateMachineBox.setTheme: Invalid theme '#{theme}' given!")
+
+        @_theme = @THEMES[theme]
+        if redraw is true
+            popup.setTheme(@_theme) for popup in @_popups
         return @
 
     ###*
@@ -309,15 +374,20 @@ class window.StateMachineBox
         @showNavigation     = options.showNavigation or false
         @container          = options.container or $(document.body)
 
-        @data       = {}
+        @data       =
+            eventPath: []
+        @_drawn     = false
 
-        @div        = @constructor._$cache.popup.clone()
+        @div        = @constructor._$cache.popup.clone().addClass(@theme)
         @overlay    = @constructor._$cache.overlay.clone()
 
-        if options.width? and options.height?
+        if (width = options.width)? and (height = options.height)?
+            # if typeof width is "string"
+            #     if width is "auto"
+
             @div.css {
-                width: options.width
-                height: options.height
+                width: width
+                height: height
             }
 
         @loader     = null
@@ -358,7 +428,8 @@ class window.StateMachineBox
                 return false
 
             self._changeContent(event, from, to)
-            self.onChange(event, from, to)
+            self.data.eventPath.push event
+            self.onChange?(event, from, to)
             return true
 
         # go!
@@ -505,7 +576,8 @@ class window.StateMachineBox
     * @return {StateMachineBox}
     * @chainable
     *###
-    # TODO; different animations: slide, fade, fade through color, immediate
+    # TODO: different animations: slide, fade, fade through color, immediate
+    # TODO: or custom function called on the object
     _changeContent: (event, from, to) ->
         body = $ """<div class="body" style="width: #{@bodyWidth - @bodyPadding.left - @bodyPadding.right}px;" />"""
         content = @contents[to]
@@ -561,6 +633,9 @@ class window.StateMachineBox
     currentContent: () ->
         return @contents[@current]
 
+    getLocale: (key) ->
+        return @constructor.getLocale(@locale, key)
+
     ###*
     * This method draws the StateMachineBox instance to the DOM.
     * @method draw
@@ -572,24 +647,30 @@ class window.StateMachineBox
             console.warn "Popup::draw: tried to draw more than 1 popup but mode is set to 'single'!"
             return @
 
+        if @_drawn is true
+            console.warn "Popup::draw: tried to draw same StateMachineBox instance more than once!"
+            return @
+
         self = @
 
-        if @headline
-            headlineDiv = """<div class="header companyBGColor">
-                                <div class="headline noselect">#{@headline}</div>
-                            </div>"""
-        else
-            headlineDiv = ""
+        # if @headline
+        #     headlineDiv = """<div class="header companyBGColor">
+        #                         <div class="headline smb_noselect">#{@headline}</div>
+        #                     </div>"""
+        # else
+        #     headlineDiv = ""
 
-        @div.empty()
-            .append """<div class="content">
-                        <div class="close" />
-                        <div class="loader" />
-                        #{headlineDiv}
-                        <div class="bodyWrapper" />
-                        <div class="navigation" />
-                        <div class="footer" />
-                    </div>"""
+        @div.find(".headline").append @headline
+
+        # @div.empty()
+        #     .append """<div class="content">
+        #                 <div class="close" />
+        #                 <div class="loader" />
+        #                 #{headlineDiv}
+        #                 <div class="bodyWrapper" />
+        #                 <div class="navigation" />
+        #                 <div class="footer" />
+        #             </div>"""
 
         # close buutton
         @div.find(".overlay, .close").click () ->
@@ -612,32 +693,45 @@ class window.StateMachineBox
             action = null
             # just button key => use default
             if typeof button is "string"
-                b = button.toUpperCase()
+                b = button.toLowerCase()
                 button = @constructor._$cache.buttons[b].clone()
                 action = @constructor.ACTIONS[@constructor.BUTTON_ACTIONS[b]]
             # special config given => use that config
             else if button.button? and button.action?
                 b = button
-                button = @constructor._$cache.buttons[b.button.toUpperCase()].clone()
-                action = @constructor.ACTIONS[b.action.toUpperCase()]
+                button = @constructor._$cache.buttons[b.button.toLowerCase()].clone()
+                event = @constructor.ACTIONS[b.action.toLowerCase()]
+            else if button.event? and button.label?
+                if DEBUG
+                    if not @[button.event]?
+                        console.warn "StateMachineBox::draw: Invalid button configuration for StateMachineBox! Invalid button event '#{button.event}'!", @options.buttons
+                        continue
+
+                b = button
+                button = @constructor._$cache.buttons.raw.clone()
+                if b.locale is true
+                    button.text @getLocale(b.label)
+                else
+                    button.text b.label
+                event = @[b.event]
             # invalid
             else if DEBUG
                 button = null
 
             if DEBUG
                 if not button?
-                    console.warn "Invalid button configuration for Popup!", @options.buttons
+                    console.warn "StateMachineBox::draw: Invalid button configuration for StateMachineBox!", @options.buttons
                     continue
 
-            if action?
+            if event?
                 # button = $ button
                 lastColor = @constructor.BUTTON_COLORS[idx]
                 button.css {
                     "background-color": lastColor
                 }
-                do (action) ->
+                do (event) ->
                     button.click () ->
-                        action.call(self)
+                        event.call(self)
                         return true
                 @footer.append button
 
@@ -680,7 +774,7 @@ class window.StateMachineBox
 
     ###*
     * This method redraws the StateMachineBox instance.
-    * This does not actually redraw everything but resets the texts of elemnts containing locale data.
+    * This does not actually redraw everything but resets the texts of elements containing locale data.
     * @method redraw
     * @return {StateMachineBox}
     * @chainable
@@ -690,6 +784,18 @@ class window.StateMachineBox
         for key, val of @contructor.getLocale(@locale)
             elems.filter("[data-langkey=\"#{key}\"]").text val
 
+        return @
+
+    ###*
+    * This method redraws the StateMachineBox instance.
+    * This does not actually redraw everything but resets the theme css classes of the according elements.
+    * @method redraw
+    * @return {StateMachineBox}
+    * @chainable
+    *###
+    setTheme: (theme) ->
+        if @theme isnt theme
+            @div.find(".#{@theme}").removeClass(@theme).addClass(theme)
         return @
 
     # EVENT (STATE MACHINE) STUFF

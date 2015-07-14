@@ -8,13 +8,6 @@
         "StateMachineBox.js": {
             "name": "StateMachineBox.js",
             "modules": {},
-            "classes": {},
-            "fors": {},
-            "namespaces": {}
-        },
-        "StateMachineBox.prod.js": {
-            "name": "StateMachineBox.prod.js",
-            "modules": {},
             "classes": {
                 "StateMachineBox": 1
             },
@@ -32,8 +25,8 @@
             "extensions": [],
             "plugin_for": [],
             "extension_for": [],
-            "file": "StateMachineBox.prod.js",
-            "line": 3,
+            "file": "StateMachineBox.js",
+            "line": 12,
             "is_constructor": 1,
             "params": [
                 {
@@ -57,7 +50,18 @@
     "classitems": [
         {
             "file": "StateMachineBox.js",
-            "line": 102,
+            "line": 24,
+            "description": "This property defines what modes the StateMachineBox can have.",
+            "final": 1,
+            "static": 1,
+            "itemtype": "property",
+            "name": "MODES",
+            "type": "Object",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 111,
             "description": "This method initializes the StateMachineBox class. For example the default locales are set.",
             "static": 1,
             "access": "public",
@@ -73,7 +77,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 129,
+            "line": 138,
             "description": "This method finds out which StateMachineBox instance is the front most.\nIt doesn't work if custom styles or css classes are set.",
             "static": 1,
             "access": "public",
@@ -88,7 +92,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 151,
+            "line": 160,
             "description": "This method finds out which StateMachineBox instance is the front most.\nIt doesn't work if custom styles or css classes are set.",
             "static": 1,
             "access": "protected",
@@ -111,7 +115,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 169,
+            "line": 178,
             "description": "This method returns the active StateMachineBox instance or the front most (if none are active).",
             "static": 1,
             "access": "protected",
@@ -126,7 +130,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 183,
+            "line": 192,
             "description": "This method sets the locale information for a specific language. This information will be updated in all StateMachineBox'es by default.",
             "static": 1,
             "access": "protected",
@@ -159,7 +163,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 234,
+            "line": 243,
             "description": "This method gets the locale value for a given language and and a given key. If no key is specified this method returns the data object for the given language.",
             "static": 1,
             "access": "protected",
@@ -186,7 +190,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 265,
+            "line": 274,
             "description": "This method can be used to remove unneeded locale data from the memory.",
             "static": 1,
             "itemtype": "method",
@@ -207,7 +211,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 289,
+            "line": 298,
             "description": "This method can be used to add a StateMachineBox to the list of registered instances.",
             "static": 1,
             "access": "protected",
@@ -230,7 +234,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 308,
+            "line": 317,
             "description": "This method can be used to remove a StateMachineBox from the list of registered instances.",
             "static": 1,
             "access": "protected",
@@ -253,7 +257,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 434,
+            "line": 443,
             "description": "This method sets the current StateMachineBox instance as currently active.",
             "access": "protected",
             "tagname": "",
@@ -268,7 +272,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 449,
+            "line": 458,
             "description": "This method show the instance's div.",
             "itemtype": "method",
             "name": "show",
@@ -281,7 +285,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 463,
+            "line": 472,
             "description": "This method hides the instance's div.",
             "itemtype": "method",
             "name": "hide",
@@ -294,7 +298,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 477,
+            "line": 486,
             "description": "This method shows the instance's overlay.",
             "itemtype": "method",
             "name": "showOverlay",
@@ -307,7 +311,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 491,
+            "line": 500,
             "description": "This method hides the instance's overlay.",
             "itemtype": "method",
             "name": "hideOverlay",
@@ -320,7 +324,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 505,
+            "line": 514,
             "description": "This method shows the instance's ajax loader.",
             "itemtype": "method",
             "name": "showLoader",
@@ -333,7 +337,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 519,
+            "line": 528,
             "description": "This method hides the instance's ajax loader.",
             "itemtype": "method",
             "name": "hideLoader",
@@ -346,7 +350,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 533,
+            "line": 542,
             "description": "This method triggers an action (one of StateMachineBox.ACTIONS).\nThose actions are a subset of all events.",
             "itemtype": "method",
             "name": "fireAction",
@@ -370,7 +374,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 559,
+            "line": 568,
             "description": "This method hides the instance's ajax loader.",
             "itemtype": "method",
             "name": "close",
@@ -390,7 +394,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 596,
+            "line": 605,
             "description": "Synonym for close.",
             "itemtype": "method",
             "name": "remove",
@@ -398,7 +402,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 607,
+            "line": 616,
             "description": "This method hides the instance's ajax loader.",
             "access": "protected",
             "tagname": "",
@@ -430,7 +434,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 653,
+            "line": 662,
             "description": "This method returns the content associated with the current state.",
             "itemtype": "method",
             "name": "currentContent",
@@ -443,7 +447,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 666,
+            "line": 675,
             "description": "This method draws the StateMachineBox instance to the DOM.",
             "itemtype": "method",
             "name": "draw",
@@ -456,7 +460,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 765,
+            "line": 774,
             "description": "This method redraws the StateMachineBox instance.\nThis does not actually redraw everything but resets the texts of elemnts containing locale data.",
             "itemtype": "method",
             "name": "redraw",
@@ -469,7 +473,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 786,
+            "line": 795,
             "description": "This method triggers an event. If the event is invalid for the current state onFailure will be called.\nThis method might seem a bit unnecessary but implicit event function calls might appear weird and this method has better error reporting.",
             "itemtype": "method",
             "name": "fireEvent",
@@ -494,7 +498,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 814,
+            "line": 823,
             "description": "This method is a convenience method for fireEvent. If the state allows only 1 event this method will trigger that event.",
             "itemtype": "method",
             "name": "next",
@@ -507,7 +511,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 862,
+            "line": 871,
             "description": "This method is a convenience method for fireEvent (just like next). The difference here is that the state machine has no direction so next and prev are indistinguishable. Therefore the state machine must have a 'back' event for all states that are supposed to allow prev.\nOnly if there is exactly 1 other state that has an event that changes to the current state, prev can be applied.",
             "itemtype": "method",
             "name": "prev",

@@ -36,6 +36,7 @@ doc: make
 
 production: _make_no_debug
 	uglifyjs $(PROJECT_NAME).prod.js -o $(PROJECT_NAME).min.js -c -m drop_console=true -d DEBUG=false
+	rm -f $(PROJECT_NAME).prod.js
 	java -jar yuicompressor-2.4.8.jar css/$(PROJECT_NAME).css -o css/$(PROJECT_NAME).min.css --charset utf-8
 
 production_inclusive: production

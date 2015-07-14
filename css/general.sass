@@ -18,60 +18,64 @@ $bodyHeight: #{$bodyWrapperHeight - 20px}
     width: $popupWidth
     z-index: 1000
 
-    .content
-        background-color: white
+    .positioner
         height: 100%
-        overflow: hidden
-        position: relative
         left: -50%
+        position: relative
 
-        .header
-            height: $headerHeight
-            line-height: $headerHeight
-            padding: 0px 40px 0px 40px
-            width: #{$popupWidth - 80px}
-            width: calc(100% - 80px)
-
-            .headline
-                overflow: hidden
-                text-overflow: ellipsis
-                white-space: nowrap
-                width: 95%
-        // see cursor style for draggable smb at bottom
-
-        .bodyWrapper
-            box-sizing: border-box
-            display: table
-            height: calc(100% - #{$headerHeight + $footerHeight})
+        .content
+            background-color: white
+            height: 100%
             overflow: hidden
-            padding: 0px
-            width: 4000px
+            position: relative
 
-            .body
-                display: table-cell
-                float: left
-                height: calc(100% - 20px)
-                padding: 10px 40px 10px 40px
+            .header
+                height: $headerHeight
+                line-height: $headerHeight
+                padding: 0px 40px 0px 40px
+                width: #{$popupWidth - 80px}
+                width: calc(100% - 80px)
 
-        .navigation
-            bottom: $footerHeight
-            height: $navigationHeight
-            position: absolute
-            text-align: center
-            width: 100%
+                .headline
+                    overflow: hidden
+                    text-overflow: ellipsis
+                    white-space: nowrap
+                    width: 95%
+            // see cursor style for draggable smb at bottom
 
-            .dot
-                cursor: pointer
-                display: inline-block
+            .bodyWrapper
+                box-sizing: border-box
+                display: table
+                height: calc(100% - #{$headerHeight + $footerHeight})
+                overflow: hidden
+                padding: 0px
+                width: 4000px
 
-        .footer
-            height: $footerHeight
-            padding: 0px
-            width: 100%
+                .body
+                    display: table-cell
+                    float: left
+                    height: calc(100% - 20px)
+                    padding: 10px 40px 10px 40px
 
-            .button
-                min-width: 120px
-                position: relative
+            .navigation
+                bottom: $footerHeight
+                height: $navigationHeight
+                position: absolute
+                text-align: center
+                width: 100%
+
+                .dot
+                    cursor: pointer
+                    display: inline-block
+
+            .footer
+                height: $footerHeight
+                padding: 0px
+                width: 100%
+
+                .button
+                    min-width: 120px
+                    position: relative
 
 
 .smb.draggable .content .header
@@ -83,3 +87,25 @@ $bodyHeight: #{$bodyWrapperHeight - 20px}
     position: fixed
     top: 0px
     width: 100%
+
+// general purpose classes
+.smb_noselect
+    -webkit-touch-callout: none
+    -webkit-user-select: none
+    -khtml-user-select: none
+    -moz-user-select: none
+    -ms-user-select: none
+    user-select: none
+
+.smb_hidden
+    display: none
+
+.smb_clear
+    clear: both
+
+.smb_top
+    z-index: 1000
+
+// .error
+//     background-color: rgb(247, 195, 195)
+//     color: red

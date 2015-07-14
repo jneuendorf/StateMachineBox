@@ -1,116 +1,80 @@
 describe "StateMachineBox", () ->
 
-    it "should work", () ->
+    images = [
+        "<img src='img/closeup.jpg' />"
+        "<img src='img/clouds.jpg' />"
+        "<img src='img/little-tree.jpg' />"
+        "<img src='img/moon.jpg' />"
+        "<img src='img/nature-wlk.jpg' />"
+        "<img src='img/nature1.jpg' />"
+        "<img src='img/sun-flowers.jpg' />"
+        "<img src='img/sun1.jpg' />"
+    ]
 
-        renderOptions =
-            title:      false
-            format:     ""
-            dateFormat: null
+    config =
+        events: [
+            # initial content
+            { name: "init", from: "none", to: "initial", content: images[0] }
 
-        # CONTENT FOR "chooseExportFormat"
-        formats = ["png", "csv"]
-        formatOptions = $ """<div>Exportformat wählen:</div>
-                            #{("""<div class="formatOption">#{format.toUpperCase()}</div>""" for format in formats).join("\n")}"""
+            { name: "left", from: "initial", to: "left", content: images[1] }
+            { name: "right", from: "initial", to: "right", content: images[2] }
+            { name: "back", from: "left", to: "initial" }
+            { name: "back", from: "right", to: "initial" }
 
-        formatOptions.filter(".formatOption").eq(0).click () ->
-            elem = $ @
-            renderOptions.format = formats[0]
-            popup.fireEvent("png")
-            return true
-        formatOptions.filter(".formatOption").eq(1).click () ->
-            elem = $ @
-            renderOptions.format = formats[1]
-            popup.fireEvent("csv")
-            return true
+            { name: "left", from: "left", to: "left_left", content: images[3] }
+            { name: "right", from: "left", to: "left_right", content: images[4] }
+            { name: "back", from: "left_left", to: "left" }
+            { name: "back", from: "left_right", to: "left" }
 
-        # CONTENT FOR "chooseExportTitle"
-        options = [true, false]
-        titleOptions = $ """<div>Sollen Titel und Untertitel mit exportiert werden?<br />
-                            (Falls beide leer sind, wird diese Einstellung ignoriert)</div>
-                            <div class="titleOption">Ja</div>
-                            <div class="titleOption selected">Nein</div>"""
-        titleOptions.filter(".titleOption").each (idx, elem) ->
-            elem = $ elem
-            return elem.click () ->
-                renderOptions.title = options[idx]
-                popup.fireEvent("exportTitleOptionChosen")
-                return true
+            { name: "left", from: "left_left", to: "left_left_left", content: images[5] }
+            { name: "right", from: "left_left", to: "left_left_right", content: images[6] }
+            { name: "back", from: "left_left_left", to: "left_left" }
+            { name: "back", from: "left_left_right", to: "left_left" }
 
-        # CONTENT FOR "chooseDateFormat"
-        # chosenDateFormat    = "auto"
-        dateFormats         = ["auto"]
-        dateFormatOptions   = $ """<div>Datumsformat wählen:</div>
-                                   <div class="dateFormatOption selected">AUTO</div>
-                                   <div class="dateFormatLabel">
-                                       <span class="hidden">Beispiel:</span>
-                                       <span>abhängig vom Zeitintervall im Favoriten</span>
-                                   </div>
-                                   <div class="dateFormat ok">OK</div>"""
-        dateFormatOptions.filter(".dateFormatOption").each (idx, elem) ->
-            elem = $ elem
-            return elem.click () ->
-                # popup.fireEvent(format)
-                return true
-        dateFormatOptions.filter(".ok").click () ->
-            popup.fireEvent("formatChosen")
-            return true
+            { name: "left", from: "left_left_left", to: "final", content: images[7] }
+            { name: "left", from: "left_left_right", to: "final" }
+            { name: "left", from: "left_right", to: "final" }
+            { name: "right", from: "left_left_left", to: "final" }
+            { name: "right", from: "left_left_right", to: "final" }
+            { name: "right", from: "left_right", to: "final" }
+        ]
+        # TODO: move possible callbacks of state machine js to statemachineconfig: ie. onbeforeevent should be able to be put into the StateMachineBox ctor options
+        # callbacks:
+        #     onbeforeevent: () ->
+        #         console.log arguments
 
-        # CONTENT FOR "chooseStartPNGExport" and "chooseStartCSVExport"
-        startOptions = $ """<div>Export starten?</div>
-                            <div class="startOption">OK</div>
-                            <div class="startOption">Abbrechen</div>"""
-        startOptions.filter(".startOption").eq(0).click () ->
-            return popup.close()
-        startOptions.filter(".startOption").eq(1).click () ->
-            return popup.fireAction("cancel")
+    it "singleton-like behavior", () ->
+        StateMachineBox.MODE = StateMachineBox.MODES.SINGLE
 
-        popupStateMachine =
-            events: [
-                # initial content
-                { name: "init", from: "none", to: "chooseExportFormat", content: formatOptions }
-                # choose format
-                { name: "png",  from: "chooseExportFormat", to: "chooseExportTitle", content: titleOptions }
-                { name: "csv",  from: "chooseExportFormat", to: "chooseDateFormat", content: dateFormatOptions }
-                { name: "back", from: "chooseExportFormat", to: "chooseExportFormat" } # enable going back (must be "back")
-                # export title? (in PNG branch)
-                { name: "exportTitleOptionChosen",  from: "chooseExportTitle", to: "chooseStartPNGExport", content: startOptions }
-                { name: "back",                     from: "chooseExportTitle", to: "chooseExportFormat" }
-                # choose date format (in CSV branch)
-                { name: "formatChosen", from: "chooseDateFormat", to: "chooseStartCSVExport", content: startOptions }
-                { name: "back",         from: "chooseDateFormat", to: "chooseExportFormat" }
-                # start export? (in PNG branch)
-                { name: "true",  from: "chooseStartPNGExport", to: "close" } # "close" = reserved state (-> action) of the popup
-                { name: "false", from: "chooseStartPNGExport", to: "cancel" } # "cancel" = reserved state (-> action) of the popup
-                { name: "back",  from: "chooseStartPNGExport", to: "chooseExportTitle" }
-                # start export? (in CSV branch)
-                { name: "true",  from: "chooseStartCSVExport", to: "close" }
-                { name: "false", from: "chooseStartCSVExport", to: "cancel" }
-                { name: "back",  from: "chooseStartCSVExport", to: "chooseDateFormat" }
+
+    it "multiple-like behavior", () ->
+        StateMachineBox.MODE = StateMachineBox.MODES.MANY
+
+        popup = new StateMachineBox(config, null, {
+            buttons: [
+                {
+                    event: "left"
+                    label: "left"
+                    locale: false
+                }
+                {
+                    event: "right"
+                    label: "right"
+                    locale: false
+                }
+                {
+                    event: "back"
+                    label: "back"
+                    locale: false
+                }
             ]
-
-        popup = new StateMachineBox(popupStateMachine, "Exporteinstellungen", {
-            buttons: ["cancel", "next", "prev"]
-            closeButtonAction: "cancel"
-            width: "500px"
-            height: "350px"
-            onClose: () ->
-                startRendering(favIds, renderOptions, folderName)
+            # closeButtonAction: "cancel"
+            width: "700x"
+            height: "auto"
+            # onClose: () ->
+            #     startRendering(favIds, renderOptions, folderName)
             onFailure: (event) ->
-                currentState = @current
-                if event is "next"
-                    if currentState is "chooseExportFormat"
-                        # no file format chosen yet => highlight both buttons
-                        if renderOptions.format not in formats
-                            content = popup.currentContent()
-                            orgColor = content.eq(0).css("color")
-                        # something has previously been selected => go that route
-                        else
-                            popup.fireEvent renderOptions.format
-                        return false
-                    # valid options and clicking "next" on last content => also start export
-                    if currentState in ["chooseStartPNGExport", "chooseStartCSVExport"]
-                        popup.close()
-                        return false
+                console.warn event
                 return true
         })
         popup.draw()

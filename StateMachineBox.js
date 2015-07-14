@@ -20,16 +20,43 @@
    */
 
   window.StateMachineBox = (function() {
+
+    /**
+    * This property defines what modes the StateMachineBox class can have.
+    * @final
+    * @static
+    * @property MODES
+    * @type Object
+    *
+     */
     StateMachineBox.MODES = {
       SINGLE: "single",
       MANY: "many"
     };
 
+
+    /**
+    * This property defines the current mode of the StateMachineBox class.
+    * @static
+    * @property MODE
+    * @type String
+    * @default MODES.SINGLE
+    *
+     */
+
     StateMachineBox.MODE = StateMachineBox.MODES.SINGLE;
 
-    StateMachineBox.FADE_TIME = 180;
 
-    StateMachineBox.DEFAULT_CSS_CLASS = "default";
+    /**
+    * This property defines how fast fade-in and fade-out animations are.
+    * @static
+    * @property FADE_TIME
+    * @type Number
+    * @default 180
+    *
+     */
+
+    StateMachineBox.FADE_TIME = 180;
 
     StateMachineBox.BUTTON_ACTIONS = {
       OK: "CLOSE",
@@ -76,6 +103,31 @@
 
     StateMachineBox.BUTTON_COLORS = ["#222222", "#9FA39F", "#B9BCB9", "#D3D5D3"];
 
+
+    /**
+    * This property defines all themes.
+    * @static
+    * @property THEMES
+    * @type Object
+    *
+     */
+
+    StateMachineBox.THEMES = {
+      DEFAULT: "default"
+    };
+
+
+    /**
+    * This property defines the current theme of the StateMachineBox class.
+    * @static
+    * @property _theme
+    * @type String
+    * @default THEMES.DEFAULT
+    *
+     */
+
+    StateMachineBox._theme = StateMachineBox.THEMES.DEFAULT;
+
     StateMachineBox._popups = [];
 
     StateMachineBox._activePopup = null;
@@ -86,9 +138,10 @@
     }
 
     StateMachineBox._$cache = {
-      popup: $("<div class=\"popup\">\n    <div class=\"content\">\n        <div class=\"close\" />\n        <div class=\"loader\" />\n        <div class=\"header\">\n            <div class=\"headline\" />\n        </div>\n        <div class=\"bodyWrapper\" />\n        <div class=\"navigation\" />\n        <div class=\"footer\" />\n    </div>\n</div>"),
-      overlay: $("<div class=\"popup overlay\" />"),
+      popup: $("<div class=\"smb\">\n    <div class=\"positioner\">\n        <div class=\"content\">\n            <div class=\"loader\" />\n            <div class=\"header\">\n                <div class=\"headline smb_noselect\" />\n            </div>\n            <div class=\"bodyWrapper\" />\n            <div class=\"navigation\" />\n            <div class=\"footer\" />\n        </div>\n        <div class=\"close\" />\n    </div>\n</div>"),
+      overlay: $("<div class=\"overlay\" />"),
       buttons: {
+        raw: $("<div class=\"button raw\" />"),
         ok: $("<div class=\"button ok\" data-langkey=\"ok\" />"),
         cancel: $("<div class=\"button cancel\" data-langkey=\"cancel\" />"),
         next: $("<div class=\"button next\" data-langkey=\"next\" />"),
@@ -210,10 +263,12 @@
             }
           }
           this.locale[language] = values;
-          ref1 = this._popups;
-          for (k = 0, len1 = ref1.length; k < len1; k++) {
-            popup = ref1[k];
-            popup.redraw();
+          if (redraw === true) {
+            ref1 = this._popups;
+            for (k = 0, len1 = ref1.length; k < len1; k++) {
+              popup = ref1[k];
+              popup.redraw();
+            }
           }
           return this;
         }
@@ -285,6 +340,50 @@
       return this;
     };
 
+    StateMachineBox.addTheme = function(theme) {
+      if (DEBUG) {
+        if (this.THEMES[theme] == null) {
+          if (theme !== theme.toUpperCase()) {
+            console.warn("StateMachineBox.addTheme: For consistency it is recommended to use upper case theme names. Theme '" + theme + "' will be set anyways.");
+          }
+          this.THEMES[theme] = theme;
+        }
+        throw new Error("StateMachineBox.addTheme: Theme '" + theme + "' already exists!");
+      }
+      this.THEMES[theme] = theme;
+      return this;
+    };
+
+    StateMachineBox.setTheme = function(theme, redraw) {
+      var j, k, len, len1, popup, ref, ref1;
+      if (redraw == null) {
+        redraw = true;
+      }
+      if (DEBUG) {
+        if (this.THEMES[theme] != null) {
+          this._theme = this.THEMES[theme];
+          if (redraw === true) {
+            ref = this._popups;
+            for (j = 0, len = ref.length; j < len; j++) {
+              popup = ref[j];
+              popup.setTheme(this._theme);
+            }
+          }
+          return this;
+        }
+        throw new Error("StateMachineBox.setTheme: Invalid theme '" + theme + "' given!");
+      }
+      this._theme = this.THEMES[theme];
+      if (redraw === true) {
+        ref1 = this._popups;
+        for (k = 0, len1 = ref1.length; k < len1; k++) {
+          popup = ref1[k];
+          popup.setTheme(this._theme);
+        }
+      }
+      return this;
+    };
+
 
     /**
     * This method can be used to add a StateMachineBox to the list of registered instances.
@@ -341,7 +440,7 @@
     };
 
     function StateMachineBox(stateMachineConfig, headline, options) {
-      var callback, callbackName, event, j, k, len, len1, ref, ref1, ref2, self;
+      var callback, callbackName, event, height, j, k, len, len1, ref, ref1, ref2, self, width;
       if (options == null) {
         options = {};
       }
@@ -382,13 +481,16 @@
       this.locale = options.locale || "en";
       this.showNavigation = options.showNavigation || false;
       this.container = options.container || $(document.body);
-      this.data = {};
-      this.div = this.constructor._$cache.popup.clone();
+      this.data = {
+        eventPath: []
+      };
+      this._drawn = false;
+      this.div = this.constructor._$cache.popup.clone().addClass(this.theme);
       this.overlay = this.constructor._$cache.overlay.clone();
-      if ((options.width != null) && (options.height != null)) {
+      if (((width = options.width) != null) && ((height = options.height) != null)) {
         this.div.css({
-          width: options.width,
-          height: options.height
+          width: width,
+          height: height
         });
       }
       this.loader = null;
@@ -423,7 +525,10 @@
           return false;
         }
         self._changeContent(event, from, to);
-        self.onChange(event, from, to);
+        self.data.eventPath.push(event);
+        if (typeof self.onChange === "function") {
+          self.onChange(event, from, to);
+        }
         return true;
       };
       StateMachine.create(stateMachineConfig);
@@ -662,6 +767,10 @@
       return this.contents[this.current];
     };
 
+    StateMachineBox.prototype.getLocale = function(key) {
+      return this.constructor.getLocale(this.locale, key);
+    };
+
 
     /**
     * This method draws the StateMachineBox instance to the DOM.
@@ -672,18 +781,17 @@
      */
 
     StateMachineBox.prototype.draw = function() {
-      var action, b, body, button, buttons, content, headlineDiv, idx, j, lastColor, len, self;
+      var action, b, body, button, buttons, content, event, idx, j, lastColor, len, self;
       if (this.constructor.MODE === this.constructor.MODES.SINGLE && (this.constructor.getActive() != null)) {
         console.warn("Popup::draw: tried to draw more than 1 popup but mode is set to 'single'!");
         return this;
       }
-      self = this;
-      if (this.headline) {
-        headlineDiv = "<div class=\"header companyBGColor\">\n    <div class=\"headline noselect\">" + this.headline + "</div>\n</div>";
-      } else {
-        headlineDiv = "";
+      if (this._drawn === true) {
+        console.warn("Popup::draw: tried to draw same StateMachineBox instance more than once!");
+        return this;
       }
-      this.div.empty().append("<div class=\"content\">\n    <div class=\"close\" />\n    <div class=\"loader\" />\n    " + headlineDiv + "\n    <div class=\"bodyWrapper\" />\n    <div class=\"navigation\" />\n    <div class=\"footer\" />\n</div>");
+      self = this;
+      this.div.find(".headline").append(this.headline);
       this.div.find(".overlay, .close").click(function() {
         self.fireAction(self.closeButtonAction);
         return true;
@@ -703,33 +811,48 @@
         }
         action = null;
         if (typeof button === "string") {
-          b = button.toUpperCase();
+          b = button.toLowerCase();
           button = this.constructor._$cache.buttons[b].clone();
           action = this.constructor.ACTIONS[this.constructor.BUTTON_ACTIONS[b]];
         } else if ((button.button != null) && (button.action != null)) {
           b = button;
-          button = this.constructor._$cache.buttons[b.button.toUpperCase()].clone();
-          action = this.constructor.ACTIONS[b.action.toUpperCase()];
+          button = this.constructor._$cache.buttons[b.button.toLowerCase()].clone();
+          event = this.constructor.ACTIONS[b.action.toLowerCase()];
+        } else if ((button.event != null) && (button.label != null)) {
+          if (DEBUG) {
+            if (this[button.event] == null) {
+              console.warn("StateMachineBox::draw: Invalid button configuration for StateMachineBox! Invalid button event '" + button.event + "'!", this.options.buttons);
+              continue;
+            }
+          }
+          b = button;
+          button = this.constructor._$cache.buttons.raw.clone();
+          if (b.locale === true) {
+            button.text(this.getLocale(b.label));
+          } else {
+            button.text(b.label);
+          }
+          event = this[b.event];
         } else if (DEBUG) {
           button = null;
         }
         if (DEBUG) {
           if (button == null) {
-            console.warn("Invalid button configuration for Popup!", this.options.buttons);
+            console.warn("StateMachineBox::draw: Invalid button configuration for StateMachineBox!", this.options.buttons);
             continue;
           }
         }
-        if (action != null) {
+        if (event != null) {
           lastColor = this.constructor.BUTTON_COLORS[idx];
           button.css({
             "background-color": lastColor
           });
-          (function(action) {
+          (function(event) {
             return button.click(function() {
-              action.call(self);
+              event.call(self);
               return true;
             });
-          })(action);
+          })(event);
           this.footer.append(button);
         }
       }
@@ -764,7 +887,7 @@
 
     /**
     * This method redraws the StateMachineBox instance.
-    * This does not actually redraw everything but resets the texts of elemnts containing locale data.
+    * This does not actually redraw everything but resets the texts of elements containing locale data.
     * @method redraw
     * @return {StateMachineBox}
     * @chainable
@@ -778,6 +901,23 @@
       for (key in ref) {
         val = ref[key];
         elems.filter("[data-langkey=\"" + key + "\"]").text(val);
+      }
+      return this;
+    };
+
+
+    /**
+    * This method redraws the StateMachineBox instance.
+    * This does not actually redraw everything but resets the theme css classes of the according elements.
+    * @method redraw
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
+    StateMachineBox.prototype.setTheme = function(theme) {
+      if (this.theme !== theme) {
+        this.div.find("." + this.theme).removeClass(this.theme).addClass(theme);
       }
       return this;
     };
