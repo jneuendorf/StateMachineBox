@@ -11,17 +11,24 @@ $bodyHeight: #{$bodyWrapperHeight - 20px}
 
 .smb
     height: $popupHeight
-    left: 50%
-    // !important needed for jqueryUI draggable
+    left: calc(50% - #{$popupWidth / 2})
+    // !important needed for jquery ui draggable
     position: absolute !important
-    top: 20%
+    top: calc(50% - #{$popupHeight / 2})
     width: $popupWidth
     z-index: 1000
 
+    // .clickDelegator
+    //     height: 100%
+    //     left: 50%
+    //     position: absolute
+    //     width: 50%
+
     .positioner
         height: 100%
-        left: -50%
+        // left: -50%
         position: relative
+        width: 100%
 
         .content
             background-color: white
@@ -81,7 +88,7 @@ $bodyHeight: #{$bodyWrapperHeight - 20px}
 .smb.draggable .content .header
     cursor: move
 
-.smb.overlay
+.smb-overlay
     height: 100%
     left: 0px
     position: fixed

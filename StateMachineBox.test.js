@@ -90,15 +90,63 @@
           from: "left_right",
           to: "final"
         }
-      ],
-      callbacks: {
-        onbeforeevent: function() {
-          return console.log(arguments);
-        }
-      }
+      ]
     };
     it("singleton-like behavior", function() {
-      return StateMachineBox.MODE = StateMachineBox.MODES.SINGLE;
+      var popup, popup2;
+      StateMachineBox.MODE = StateMachineBox.MODES.SINGLE;
+      popup = new StateMachineBox(config, null, {
+        buttons: [
+          {
+            event: "left",
+            label: "left",
+            locale: false
+          }, {
+            event: "right",
+            label: "right",
+            locale: false
+          }, {
+            event: "back",
+            label: "back",
+            locale: false
+          }
+        ],
+        width: "700px",
+        height: "630px",
+        onFailure: function(event) {
+          console.warn(event);
+          return true;
+        }
+      });
+      popup.draw();
+      console.log(popup);
+      expect(true).toBe(true);
+      popup2 = new StateMachineBox(config, null, {
+        buttons: [
+          {
+            event: "left",
+            label: "left",
+            locale: false
+          }, {
+            event: "right",
+            label: "right",
+            locale: false
+          }, {
+            event: "back",
+            label: "back",
+            locale: false
+          }
+        ],
+        width: "700px",
+        height: "630px",
+        onFailure: function(event) {
+          console.warn(event);
+          return true;
+        }
+      });
+      popup2.draw();
+      expect(popup2.div.is(":visible")).toBe(false);
+      return console.log(popup2);
     });
     return it("multiple-like behavior", function() {
       var popup;
@@ -119,14 +167,15 @@
             locale: false
           }
         ],
-        width: "700x",
-        height: "auto",
+        width: "700px",
+        height: "630px",
         onFailure: function(event) {
           console.warn(event);
           return true;
         }
       });
       popup.draw();
+      console.log(popup);
       return expect(true).toBe(true);
     });
   });

@@ -81,7 +81,7 @@ class window.StateMachineBox
     * @type Object
     *###
     @THEMES =
-        DEFAULT: "default"
+        DEFAULT: "smb-default"
     ###*
     * This property defines the current theme of the StateMachineBox class.
     * @static
@@ -136,7 +136,7 @@ class window.StateMachineBox
                                 <div class="close" />
                             </div>
                         </div>"""
-        overlay:    $ """<div class="overlay" />"""
+        overlay:    $ """<div class="smb-overlay" />"""
         buttons:
             raw:    $ """<div class="button raw" />"""
             ok:     $ """<div class="button ok" data-langkey="ok" />"""
@@ -369,7 +369,7 @@ class window.StateMachineBox
         @beforeChange       = options.beforeChange
         @onFailure          = options.onFailure
 
-        @theme              = options.theme or "default"
+        @theme              = options.theme or @constructor.THEMES.DEFAULT
         @locale             = options.locale or "en"
         @showNavigation     = options.showNavigation or false
         @container          = options.container or $(document.body)
@@ -379,16 +379,46 @@ class window.StateMachineBox
         @_drawn     = false
 
         @div        = @constructor._$cache.popup.clone().addClass(@theme)
-        @overlay    = @constructor._$cache.overlay.clone()
+        @overlay    = @constructor._$cache.overlay.clone().addClass(@theme)
 
+        css     = {}
         if (width = options.width)? and (height = options.height)?
-            # if typeof width is "string"
-            #     if width is "auto"
+            width   = parseInt(width, 10)
+            height  = parseInt(height, 10)
 
-            @div.css {
-                width: width
-                height: height
-            }
+            if isNaN width
+                css.width = "auto"
+            else
+                css.width = "#{width}px"
+
+            if isNaN height
+                css.height = "auto"
+            else
+                css.height = "#{height}px"
+
+            # css =
+            #     left:   "calc(50% - #{width / 2}px)"
+            #     top:    "calc(50% - #{height / 2}px)"
+            #
+            # if height isnt "auto"
+            #     css.top = "calc(50% - #{parseInt(height, 10) / 2}px)"
+
+        # no 'left' option given (or falsy)
+        if not options.left
+            # 'width' was specified and is a number => use default => center the box
+            if css.width? and css.width isnt "auto"
+                css.left = "calc(50% - #{width / 2}px)"
+            # else: just use css class styling => no inline styles
+            # NOTE: that means that a default 'left' property should be defined for all themes
+
+        # smae for 'top'
+        if not options.top
+            if css.height? and css.height isnt "auto"
+                css.top = "calc(50% - #{height / 2}px)"
+
+
+        # apply css
+        @div.css css
 
         @loader     = null
 
@@ -653,26 +683,9 @@ class window.StateMachineBox
 
         self = @
 
-        # if @headline
-        #     headlineDiv = """<div class="header companyBGColor">
-        #                         <div class="headline smb_noselect">#{@headline}</div>
-        #                     </div>"""
-        # else
-        #     headlineDiv = ""
-
         @div.find(".headline").append @headline
 
-        # @div.empty()
-        #     .append """<div class="content">
-        #                 <div class="close" />
-        #                 <div class="loader" />
-        #                 #{headlineDiv}
-        #                 <div class="bodyWrapper" />
-        #                 <div class="navigation" />
-        #                 <div class="footer" />
-        #             </div>"""
-
-        # close buutton
+        # close button
         @div.find(".overlay, .close").click () ->
             self.fireAction(self.closeButtonAction)
             return true
@@ -695,16 +708,18 @@ class window.StateMachineBox
             if typeof button is "string"
                 b = button.toLowerCase()
                 button = @constructor._$cache.buttons[b].clone()
-                action = @constructor.ACTIONS[@constructor.BUTTON_ACTIONS[b]]
+                event = @constructor.ACTIONS[@constructor.BUTTON_ACTIONS[b]]
+                eventName = b
             # special config given => use that config
             else if button.button? and button.action?
                 b = button
                 button = @constructor._$cache.buttons[b.button.toLowerCase()].clone()
                 event = @constructor.ACTIONS[b.action.toLowerCase()]
+                eventName = b.action.toLowerCase()
             else if button.event? and button.label?
                 if DEBUG
                     if not @[button.event]?
-                        console.warn "StateMachineBox::draw: Invalid button configuration for StateMachineBox! Invalid button event '#{button.event}'!", @options.buttons
+                        console.warn "StateMachineBox::draw: Invalid button configuration for StateMachineBox! Invalid button event '#{eventName}'!", @options.buttons
                         continue
 
                 b = button
@@ -714,6 +729,7 @@ class window.StateMachineBox
                 else
                     button.text b.label
                 event = @[b.event]
+                eventName = b.event
             # invalid
             else if DEBUG
                 button = null
@@ -729,9 +745,10 @@ class window.StateMachineBox
                 button.css {
                     "background-color": lastColor
                 }
-                do (event) ->
+                do (eventName) ->
                     button.click () ->
-                        event.call(self)
+                        self.fireEvent(eventName)
+                        # event.call(self)
                         return true
                 @footer.append button
 
@@ -764,6 +781,8 @@ class window.StateMachineBox
                 .addClass "draggable"
         else if @constructor.MODE is @constructor.MODES.SINGLE
             @container.append @overlay.click () ->
+                # TODO due to styling the popup outest wrapper prevents clicking on overlay
+                console.log "asdfasdfasdf"
                 self.fireAction("cancel")
                 return true
 
@@ -812,6 +831,14 @@ class window.StateMachineBox
     *###
     fireEvent: (name, params...) ->
         if @[name] instanceof Function
+            if DEBUG
+                try
+                    @[name](params...)
+                catch e
+                    console.warn "StateStatePopup::fireEvent: Event '#{name}' is invalid for current state!"
+                    throw e
+                finally
+                    return @
             @[name](params...)
             return @
         console.warn "StateStatePopup::fireEvent: There is no event called '#{name}'! Use onFailure() to catch that!"

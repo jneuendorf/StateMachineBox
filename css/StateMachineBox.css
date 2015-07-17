@@ -1,15 +1,15 @@
 @charset "UTF-8";
 .smb {
   height: 400px;
-  left: 50%;
+  left: calc(50% - 400px);
   position: absolute !important;
-  top: 20%;
+  top: calc(50% - 200px);
   width: 800px;
   z-index: 1000; }
   .smb .positioner {
     height: 100%;
-    left: -50%;
-    position: relative; }
+    position: relative;
+    width: 100%; }
     .smb .positioner .content {
       background-color: white;
       height: 100%;
@@ -58,7 +58,7 @@
 .smb.draggable .content .header {
   cursor: move; }
 
-.smb.overlay {
+.smb-overlay {
   height: 100%;
   left: 0px;
   position: fixed;
@@ -82,7 +82,7 @@
 .smb_top {
   z-index: 1000; }
 
-.smb.default .close {
+.smb-default .close {
   background-color: black;
   border: 2px solid white;
   border-radius: 50%;
@@ -94,37 +94,37 @@
   right: -12.5px;
   top: -12.5px;
   width: 25px; }
-  .smb.default .close::after {
+  .smb-default .close::after {
     content: "×";
     font-size: 22px;
     left: 7px;
     position: relative;
     top: -2px; }
-.smb.default .content {
+.smb-default .content {
   border-radius: 4px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   font-family: helvetica, sans-serif; }
-  .smb.default .content .header {
+  .smb-default .content .header {
     cursor: default;
     font-size: 20px;
     font-weight: 300;
     padding: 0px 40px 0px 40px;
     text-transform: uppercase; }
-  .smb.default .content .bodyWrapper {
+  .smb-default .content .bodyWrapper {
     font-size: 15px;
     font-weight: normal; }
-  .smb.default .content .navigation .dot {
+  .smb-default .content .navigation .dot {
     border-radius: 50%;
     border-style: solid;
     border-width: 2px;
     margin: 0 10px 0 auto;
     height: 15px;
     width: 15px; }
-    .smb.default .content .navigation .dot.selected {
+    .smb-default .content .navigation .dot.selected {
       background-color: #BBBBBB; }
-    .smb.default .content .navigation .dot:hover {
+    .smb-default .content .navigation .dot:hover {
       background-color: #DDDDDD; }
-  .smb.default .content .footer .button {
+  .smb-default .content .footer .button {
     color: white;
     cursor: pointer;
     float: right;
@@ -134,5 +134,8 @@
     height: 35px;
     text-align: center;
     text-transform: uppercase; }
+
+.smb-default.smb-overlay {
+  background-color: rgba(0, 0, 0, 0.5); }
 
 /*# sourceMappingURL=StateMachineBox.css.map */

@@ -113,7 +113,7 @@
      */
 
     StateMachineBox.THEMES = {
-      DEFAULT: "default"
+      DEFAULT: "smb-default"
     };
 
 
@@ -139,7 +139,7 @@
 
     StateMachineBox._$cache = {
       popup: $("<div class=\"smb\">\n    <div class=\"positioner\">\n        <div class=\"content\">\n            <div class=\"loader\" />\n            <div class=\"header\">\n                <div class=\"headline smb_noselect\" />\n            </div>\n            <div class=\"bodyWrapper\" />\n            <div class=\"navigation\" />\n            <div class=\"footer\" />\n        </div>\n        <div class=\"close\" />\n    </div>\n</div>"),
-      overlay: $("<div class=\"overlay\" />"),
+      overlay: $("<div class=\"smb-overlay\" />"),
       buttons: {
         raw: $("<div class=\"button raw\" />"),
         ok: $("<div class=\"button ok\" data-langkey=\"ok\" />"),
@@ -440,7 +440,7 @@
     };
 
     function StateMachineBox(stateMachineConfig, headline, options) {
-      var callback, callbackName, event, height, j, k, len, len1, ref, ref1, ref2, self, width;
+      var callback, callbackName, css, event, height, j, k, len, len1, ref, ref1, ref2, self, width;
       if (options == null) {
         options = {};
       }
@@ -477,7 +477,7 @@
       this.beforePrev = options.beforePrev;
       this.beforeChange = options.beforeChange;
       this.onFailure = options.onFailure;
-      this.theme = options.theme || "default";
+      this.theme = options.theme || this.constructor.THEMES.DEFAULT;
       this.locale = options.locale || "en";
       this.showNavigation = options.showNavigation || false;
       this.container = options.container || $(document.body);
@@ -486,13 +486,33 @@
       };
       this._drawn = false;
       this.div = this.constructor._$cache.popup.clone().addClass(this.theme);
-      this.overlay = this.constructor._$cache.overlay.clone();
+      this.overlay = this.constructor._$cache.overlay.clone().addClass(this.theme);
+      css = {};
       if (((width = options.width) != null) && ((height = options.height) != null)) {
-        this.div.css({
-          width: width,
-          height: height
-        });
+        width = parseInt(width, 10);
+        height = parseInt(height, 10);
+        if (isNaN(width)) {
+          css.width = "auto";
+        } else {
+          css.width = width + "px";
+        }
+        if (isNaN(height)) {
+          css.height = "auto";
+        } else {
+          css.height = height + "px";
+        }
       }
+      if (!options.left) {
+        if ((css.width != null) && css.width !== "auto") {
+          css.left = "calc(50% - " + (width / 2) + "px)";
+        }
+      }
+      if (!options.top) {
+        if ((css.height != null) && css.height !== "auto") {
+          css.top = "calc(50% - " + (height / 2) + "px)";
+        }
+      }
+      this.div.css(css);
       this.loader = null;
       this.bodyWidth = parseFloat(this.options.width) || 800;
       this.bodyPadding = {
@@ -781,7 +801,7 @@
      */
 
     StateMachineBox.prototype.draw = function() {
-      var action, b, body, button, buttons, content, event, idx, j, lastColor, len, self;
+      var action, b, body, button, buttons, content, event, eventName, idx, j, lastColor, len, self;
       if (this.constructor.MODE === this.constructor.MODES.SINGLE && (this.constructor.getActive() != null)) {
         console.warn("Popup::draw: tried to draw more than 1 popup but mode is set to 'single'!");
         return this;
@@ -813,15 +833,17 @@
         if (typeof button === "string") {
           b = button.toLowerCase();
           button = this.constructor._$cache.buttons[b].clone();
-          action = this.constructor.ACTIONS[this.constructor.BUTTON_ACTIONS[b]];
+          event = this.constructor.ACTIONS[this.constructor.BUTTON_ACTIONS[b]];
+          eventName = b;
         } else if ((button.button != null) && (button.action != null)) {
           b = button;
           button = this.constructor._$cache.buttons[b.button.toLowerCase()].clone();
           event = this.constructor.ACTIONS[b.action.toLowerCase()];
+          eventName = b.action.toLowerCase();
         } else if ((button.event != null) && (button.label != null)) {
           if (DEBUG) {
             if (this[button.event] == null) {
-              console.warn("StateMachineBox::draw: Invalid button configuration for StateMachineBox! Invalid button event '" + button.event + "'!", this.options.buttons);
+              console.warn("StateMachineBox::draw: Invalid button configuration for StateMachineBox! Invalid button event '" + eventName + "'!", this.options.buttons);
               continue;
             }
           }
@@ -833,6 +855,7 @@
             button.text(b.label);
           }
           event = this[b.event];
+          eventName = b.event;
         } else if (DEBUG) {
           button = null;
         }
@@ -847,12 +870,12 @@
           button.css({
             "background-color": lastColor
           });
-          (function(event) {
+          (function(eventName) {
             return button.click(function() {
-              event.call(self);
+              self.fireEvent(eventName);
               return true;
             });
-          })(event);
+          })(eventName);
           this.footer.append(button);
         }
       }
@@ -875,6 +898,7 @@
         }).addClass("draggable");
       } else if (this.constructor.MODE === this.constructor.MODES.SINGLE) {
         this.container.append(this.overlay.click(function() {
+          console.log("asdfasdfasdf");
           self.fireAction("cancel");
           return true;
         }));
@@ -937,9 +961,20 @@
      */
 
     StateMachineBox.prototype.fireEvent = function() {
-      var name, params;
+      var e, name, params;
       name = arguments[0], params = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (this[name] instanceof Function) {
+        if (DEBUG) {
+          try {
+            this[name].apply(this, params);
+          } catch (_error) {
+            e = _error;
+            console.warn("StateStatePopup::fireEvent: Event '" + name + "' is invalid for current state!");
+            throw e;
+          } finally {
+            return this;
+          }
+        }
         this[name].apply(this, params);
         return this;
       }

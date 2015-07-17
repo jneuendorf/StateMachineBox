@@ -46,6 +46,78 @@ describe "StateMachineBox", () ->
     it "singleton-like behavior", () ->
         StateMachineBox.MODE = StateMachineBox.MODES.SINGLE
 
+        popup = new StateMachineBox(config, null, {
+            buttons: [
+                {
+                    event: "left"
+                    label: "left"
+                    locale: false
+                }
+                {
+                    event: "right"
+                    label: "right"
+                    locale: false
+                }
+                {
+                    event: "back"
+                    label: "back"
+                    locale: false
+                }
+            ]
+            # closeButtonAction: "cancel"
+            width: "700px"
+            height: "630px"
+            # onClose: () ->
+            #     startRendering(favIds, renderOptions, folderName)
+            onFailure: (event) ->
+                console.warn event
+                return true
+        })
+        popup.draw()
+
+        console.log popup
+
+        # check if we get here
+        expect(true).toBe(true)
+
+
+        # CHECK SINGLETON BEHAVIOR
+        popup2 = new StateMachineBox(config, null, {
+            buttons: [
+                {
+                    event: "left"
+                    label: "left"
+                    locale: false
+                }
+                {
+                    event: "right"
+                    label: "right"
+                    locale: false
+                }
+                {
+                    event: "back"
+                    label: "back"
+                    locale: false
+                }
+            ]
+            # closeButtonAction: "cancel"
+            width: "700px"
+            height: "630px"
+            # onClose: () ->
+            #     startRendering(favIds, renderOptions, folderName)
+            onFailure: (event) ->
+                console.warn event
+                return true
+        })
+
+        popup2.draw()
+
+        expect popup2.div.is(":visible")
+            .toBe false
+
+        console.log popup2
+
+
 
     it "multiple-like behavior", () ->
         StateMachineBox.MODE = StateMachineBox.MODES.MANY
@@ -69,8 +141,8 @@ describe "StateMachineBox", () ->
                 }
             ]
             # closeButtonAction: "cancel"
-            width: "700x"
-            height: "auto"
+            width: "700px"
+            height: "630px"
             # onClose: () ->
             #     startRendering(favIds, renderOptions, folderName)
             onFailure: (event) ->
@@ -78,6 +150,8 @@ describe "StateMachineBox", () ->
                 return true
         })
         popup.draw()
+
+        console.log popup
 
         # check if we get here
         expect(true).toBe(true)
