@@ -69,9 +69,10 @@ describe "StateMachineBox", () ->
             height: "630px"
             # onClose: () ->
             #     startRendering(favIds, renderOptions, folderName)
-            onFailure: (event) ->
-                console.warn event
-                return true
+            callbacks:
+                onFailure: (event) ->
+                    console.warn event
+                    return true
         })
         popup.draw()
 
@@ -105,9 +106,10 @@ describe "StateMachineBox", () ->
             height: "630px"
             # onClose: () ->
             #     startRendering(favIds, renderOptions, folderName)
-            onFailure: (event) ->
-                console.warn event
-                return true
+            callbacks:
+                onFailure: (event) ->
+                    console.warn event
+                    return true
         })
 
         popup2.draw()
@@ -145,9 +147,10 @@ describe "StateMachineBox", () ->
             height: "630px"
             # onClose: () ->
             #     startRendering(favIds, renderOptions, folderName)
-            onFailure: (event) ->
-                console.warn event
-                return true
+            callbacks:
+                onFailure: (event) ->
+                    console.warn event
+                    return true
         })
         popup.draw()
 

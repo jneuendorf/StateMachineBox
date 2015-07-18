@@ -113,9 +113,11 @@
         ],
         width: "700px",
         height: "630px",
-        onFailure: function(event) {
-          console.warn(event);
-          return true;
+        callbacks: {
+          onFailure: function(event) {
+            console.warn(event);
+            return true;
+          }
         }
       });
       popup.draw();
@@ -139,9 +141,11 @@
         ],
         width: "700px",
         height: "630px",
-        onFailure: function(event) {
-          console.warn(event);
-          return true;
+        callbacks: {
+          onFailure: function(event) {
+            console.warn(event);
+            return true;
+          }
         }
       });
       popup2.draw();
@@ -169,9 +173,11 @@
         ],
         width: "700px",
         height: "630px",
-        onFailure: function(event) {
-          console.warn(event);
-          return true;
+        callbacks: {
+          onFailure: function(event) {
+            console.warn(event);
+            return true;
+          }
         }
       });
       popup.draw();

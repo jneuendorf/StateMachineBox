@@ -52,13 +52,13 @@ class window.StateMachineBox
             return @close()
         OK: () ->
             @close(true)
-            if @onOk instanceof Function
-                @onOk()
+            if @callbacks.onOk instanceof Function
+                @callbacks.onOk()
             return @
         CANCEL: () ->
             @close(true)
-            if @onCancel instanceof Function
-                @onCancel()
+            if @callbacks.onCancel instanceof Function
+                @callbacks.onCancel()
             return @
         CHANGE: (targetState) ->
             return @change(targetState)
@@ -90,6 +90,53 @@ class window.StateMachineBox
     * @default THEMES.DEFAULT
     *###
     @_theme = @THEMES.DEFAULT
+
+    # ANIMATION FUNCTION
+    # NOTE: common api: (bodyWrapper, body, fromContent, toContent, event, from, to) ->
+    @ANIMATIONS =
+        SLIDE: (bodyWrapper, body, fromContent, toContent, event, from, to, callback) ->
+            body.append toContent
+
+            # animate backwards
+            if event is "back"
+                bodyWrapper.prepend(body)
+                            .css "margin-left", "-#{@bodyWidth}px"
+                            .animate(
+                                {
+                                    "margin-left": "0px"
+                                }
+                                400
+                                "swing"
+                                () ->
+                                    $(@).children().eq(1)
+                                        .detach()
+                                    callback?()
+                                    return true
+                            )
+            # animate forward
+            else if from isnt "none"
+                bodyWrapper
+                    .append(body)
+                    .animate(
+                        {
+                            "margin-left": "-#{@bodyWidth}px"
+                        }
+                        400
+                        "swing"
+                        () ->
+                            $(@).children().eq(0)
+                                .detach()
+                            $(@).css("margin-left", "0px")
+                            callback?()
+                            return true
+                    )
+        FADE:           "fade"
+        FADE_THROUGH:   (bodyWrapper, body, fromContent, toContent, event, from, to, color) ->
+            if color?
+                return "fade_#{color}"
+            return "fade"
+        NONE:           "none"
+    @ANIMATIONS.DEFAULT = @ANIMATIONS.SLIDE
 
     @_popups        = []
     @_activePopup   = null
@@ -354,32 +401,31 @@ class window.StateMachineBox
             for callbackName, callback of stateMachineConfig.callbacks when @[callbackName]?
                 throw new Error("StateMachineBox::constructor: Trying to create callback '#{callbackName}' but that property already exists in popup!!")
 
+        CLASS = @constructor
+
         @headline           = headline
         @options            = options
         @closeButtonAction  = options.closeButtonAction or "close"
-        @onClose            = options.onClose
-        @onOk               = options.onOk
-        @onCancel           = options.onCancel
-        @onNext             = options.onNext
-        @onPrev             = options.onPrev
-        @onChange           = options.onChange
-        @beforeClose        = options.beforeClose
-        @beforeNext         = options.beforeNext
-        @beforePrev         = options.beforePrev
-        @beforeChange       = options.beforeChange
-        @onFailure          = options.onFailure
 
-        @theme              = options.theme or @constructor.THEMES.DEFAULT
+        @callbacks          = options.callbacks or {}
+
+        @theme              = options.theme or CLASS.THEMES.DEFAULT
         @locale             = options.locale or "en"
         @showNavigation     = options.showNavigation or false
         @container          = options.container or $(document.body)
+        @_animate           = options.animation or CLASS.ANIMATIONS.DEFAULT
 
         @data       =
             eventPath: []
         @_drawn     = false
 
-        @div        = @constructor._$cache.popup.clone().addClass(@theme)
-        @overlay    = @constructor._$cache.overlay.clone().addClass(@theme)
+        @div        = CLASS._$cache.popup.clone().addClass(@theme)
+        @overlay    = CLASS._$cache.overlay.clone().addClass(@theme)
+
+        @bodyWrapper    = @div.find(".bodyWrapper")
+        @navigation     = @div.find(".navigation")
+        @loader         = @div.find(".loader")
+        @footer         = @div.find(".footer")
 
         css     = {}
         if (width = options.width)? and (height = options.height)?
@@ -396,13 +442,6 @@ class window.StateMachineBox
             else
                 css.height = "#{height}px"
 
-            # css =
-            #     left:   "calc(50% - #{width / 2}px)"
-            #     top:    "calc(50% - #{height / 2}px)"
-            #
-            # if height isnt "auto"
-            #     css.top = "calc(50% - #{parseInt(height, 10) / 2}px)"
-
         # no 'left' option given (or falsy)
         if not options.left
             # 'width' was specified and is a number => use default => center the box
@@ -411,16 +450,13 @@ class window.StateMachineBox
             # else: just use css class styling => no inline styles
             # NOTE: that means that a default 'left' property should be defined for all themes
 
-        # smae for 'top'
+        # same for 'top'
         if not options.top
             if css.height? and css.height isnt "auto"
                 css.top = "calc(50% - #{height / 2}px)"
 
-
         # apply css
         @div.css css
-
-        @loader     = null
 
         # taken from Popup.sass.erb
         @bodyWidth = parseFloat(@options.width) or 800
@@ -444,7 +480,6 @@ class window.StateMachineBox
         # can also be made linear => 2 options => initial -> state1.1 -> final OR initial -> state1.2 -> final
 
         @stateMachineConfig = stateMachineConfig
-        @bodyWrapper        = null
         @contents           = {}
         for event in stateMachineConfig.events when event.content?
             @contents[event.to] = event.content
@@ -466,7 +501,7 @@ class window.StateMachineBox
         StateMachine.create stateMachineConfig
 
         # register popup for possible singleton behavior
-        @constructor._registerPopup(@)
+        CLASS._registerPopup(@)
 
     ###*
     * This method sets the current StateMachineBox instance as currently active.
@@ -582,7 +617,7 @@ class window.StateMachineBox
         @constructor._unregisterPopup(@)
 
         if not ignoreCallback
-            @onClose?()
+            @callbacks.onClose?()
 
         return @
 
@@ -592,6 +627,8 @@ class window.StateMachineBox
     *###
     remove: () ->
         return @close.apply(@, arguments)
+
+    _animateSlide: () ->
 
     ###*
     * This method hides the instance's ajax loader.
@@ -609,48 +646,19 @@ class window.StateMachineBox
     # TODO: different animations: slide, fade, fade through color, immediate
     # TODO: or custom function called on the object
     _changeContent: (event, from, to) ->
-        body = $ """<div class="body" style="width: #{@bodyWidth - @bodyPadding.left - @bodyPadding.right}px;" />"""
         content = @contents[to]
 
         if not content?
-            throw new Error("StateMachineBox::_changeContent: No content given for '#{to}'!")
+            if DEBUG
+                throw new Error("StateMachineBox::_changeContent: No content given for '#{to}'!")
+            return @
 
-        if not @bodyWrapper?
-            @bodyWrapper = @div.find(".bodyWrapper")
+        body = $ """<div class="body" style="width: #{@bodyWidth - @bodyPadding.left - @bodyPadding.right}px;" />"""
 
-        body.append content
+        # if not @bodyWrapper?
+        #     @bodyWrapper = @div.find(".bodyWrapper")
 
-        # animate backwards
-        if event is "back"
-            @bodyWrapper.prepend(body)
-                        .css "margin-left", "-#{@bodyWidth}px"
-                        .animate(
-                            {
-                                "margin-left": "0px"
-                            }
-                            400
-                            "swing"
-                            () ->
-                                $(@).children().eq(1)
-                                    .detach()
-                                return true
-                        )
-        # animate forward
-        else if from isnt "none"
-            @bodyWrapper
-                .append(body)
-                .animate(
-                    {
-                        "margin-left": "-#{@bodyWidth}px"
-                    }
-                    400
-                    "swing"
-                    () ->
-                        $(@).children().eq(0)
-                            .detach()
-                        $(@).css("margin-left", "0px")
-                        return true
-                )
+        @_animate(@bodyWrapper, body, @contents[@current], content, event, from, to, @callbacks.onAnimate)
 
         return @
 
@@ -694,10 +702,6 @@ class window.StateMachineBox
         @div.mousedown () ->
             self._setAsActive()
             return true
-
-        @navigation = @div.find(".navigation")
-        @loader     = @div.find(".loader")
-        @footer     = @div.find(".footer")
 
         # create standard buttons (at bottom)
         buttons = @options.buttons or []
@@ -842,7 +846,7 @@ class window.StateMachineBox
             @[name](params...)
             return @
         console.warn "StateStatePopup::fireEvent: There is no event called '#{name}'! Use onFailure() to catch that!"
-        @onFailure?(name)
+        @callbacks.onFailure?(name)
         return @
 
     # ACTION STUFF
@@ -867,11 +871,11 @@ class window.StateMachineBox
 
         if foundEvents.length is 0
             console.warn "StateMachineBox::next: There is no event for '#{@current}'! Can't go any further! Use onFailure() to catch that!"
-            @onFailure?("next")
+            @callbacks.onFailure?("next")
             return @
 
         console.warn "StateMachineBox::next: More than 1 event for '#{@current}': [#{event.name for event in foundEvents}]! Can't decide where to go! Use onFailure() to catch that!"
-        @onFailure?("next")
+        @callbacks.onFailure?("next")
         return @
 
     ###*
@@ -891,7 +895,7 @@ class window.StateMachineBox
             # TODO: try to find definite previous state
             console.warn "StateMachineBox::prev: Cannot go to 'prev' because no back route was defined! Define it with '{ name: 'back', from: 'prevState', to: 'returnState' }' ;) Use onFailure() to catch that!"
             console.warn e
-            @onFailure?("prev")
+            @callbacks.onFailure?("prev")
             return @
 
     # NOTE: this method should not be necessary because it semantically equals fireEvent...
@@ -909,12 +913,12 @@ class window.StateMachineBox
     #
     #     for event in @stateMachineConfig.events when event.from is @current and event.to is targetState
     #         @fireEvent(event.name)
-    #         if @onChange instanceof Function
-    #             @onChange.call(@, event.from, targetState)
+    #         if @callbacks.onChange instanceof Function
+    #             @callbacks.onChange.call(@, event.from, targetState)
     #         return @
     #
     #     console.warn "StateMachineBox::change: Cannot go to '#{targetState}' from '#{@current}'! Use onFailure() to catch that!"
-    #     @onFailure?("change")
+    #     @callbacks.onFailure?("change")
     #     return @
 
 # set locale

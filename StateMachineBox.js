@@ -78,15 +78,15 @@
       },
       OK: function() {
         this.close(true);
-        if (this.onOk instanceof Function) {
-          this.onOk();
+        if (this.callbacks.onOk instanceof Function) {
+          this.callbacks.onOk();
         }
         return this;
       },
       CANCEL: function() {
         this.close(true);
-        if (this.onCancel instanceof Function) {
-          this.onCancel();
+        if (this.callbacks.onCancel instanceof Function) {
+          this.callbacks.onCancel();
         }
         return this;
       },
@@ -127,6 +127,44 @@
      */
 
     StateMachineBox._theme = StateMachineBox.THEMES.DEFAULT;
+
+    StateMachineBox.ANIMATIONS = {
+      SLIDE: function(bodyWrapper, body, fromContent, toContent, event, from, to, callback) {
+        body.append(toContent);
+        if (event === "back") {
+          return bodyWrapper.prepend(body).css("margin-left", "-" + this.bodyWidth + "px").animate({
+            "margin-left": "0px"
+          }, 400, "swing", function() {
+            $(this).children().eq(1).detach();
+            if (typeof callback === "function") {
+              callback();
+            }
+            return true;
+          });
+        } else if (from !== "none") {
+          return bodyWrapper.append(body).animate({
+            "margin-left": "-" + this.bodyWidth + "px"
+          }, 400, "swing", function() {
+            $(this).children().eq(0).detach();
+            $(this).css("margin-left", "0px");
+            if (typeof callback === "function") {
+              callback();
+            }
+            return true;
+          });
+        }
+      },
+      FADE: "fade",
+      FADE_THROUGH: function(bodyWrapper, body, fromContent, toContent, event, from, to, color) {
+        if (color != null) {
+          return "fade_" + color;
+        }
+        return "fade";
+      },
+      NONE: "none"
+    };
+
+    StateMachineBox.ANIMATIONS.DEFAULT = StateMachineBox.ANIMATIONS.SLIDE;
 
     StateMachineBox._popups = [];
 
@@ -440,7 +478,7 @@
     };
 
     function StateMachineBox(stateMachineConfig, headline, options) {
-      var callback, callbackName, css, event, height, j, k, len, len1, ref, ref1, ref2, self, width;
+      var CLASS, callback, callbackName, css, event, height, j, k, len, len1, ref, ref1, ref2, self, width;
       if (options == null) {
         options = {};
       }
@@ -463,30 +501,26 @@
           }
         }
       }
+      CLASS = this.constructor;
       this.headline = headline;
       this.options = options;
       this.closeButtonAction = options.closeButtonAction || "close";
-      this.onClose = options.onClose;
-      this.onOk = options.onOk;
-      this.onCancel = options.onCancel;
-      this.onNext = options.onNext;
-      this.onPrev = options.onPrev;
-      this.onChange = options.onChange;
-      this.beforeClose = options.beforeClose;
-      this.beforeNext = options.beforeNext;
-      this.beforePrev = options.beforePrev;
-      this.beforeChange = options.beforeChange;
-      this.onFailure = options.onFailure;
-      this.theme = options.theme || this.constructor.THEMES.DEFAULT;
+      this.callbacks = options.callbacks || {};
+      this.theme = options.theme || CLASS.THEMES.DEFAULT;
       this.locale = options.locale || "en";
       this.showNavigation = options.showNavigation || false;
       this.container = options.container || $(document.body);
+      this._animate = options.animation || CLASS.ANIMATIONS.DEFAULT;
       this.data = {
         eventPath: []
       };
       this._drawn = false;
-      this.div = this.constructor._$cache.popup.clone().addClass(this.theme);
-      this.overlay = this.constructor._$cache.overlay.clone().addClass(this.theme);
+      this.div = CLASS._$cache.popup.clone().addClass(this.theme);
+      this.overlay = CLASS._$cache.overlay.clone().addClass(this.theme);
+      this.bodyWrapper = this.div.find(".bodyWrapper");
+      this.navigation = this.div.find(".navigation");
+      this.loader = this.div.find(".loader");
+      this.footer = this.div.find(".footer");
       css = {};
       if (((width = options.width) != null) && ((height = options.height) != null)) {
         width = parseInt(width, 10);
@@ -513,7 +547,6 @@
         }
       }
       this.div.css(css);
-      this.loader = null;
       this.bodyWidth = parseFloat(this.options.width) || 800;
       this.bodyPadding = {
         top: 10,
@@ -524,7 +557,6 @@
       this._active = false;
       stateMachineConfig.target = this;
       this.stateMachineConfig = stateMachineConfig;
-      this.bodyWrapper = null;
       this.contents = {};
       ref2 = stateMachineConfig.events;
       for (k = 0, len1 = ref2.length; k < len1; k++) {
@@ -552,7 +584,7 @@
         return true;
       };
       StateMachine.create(stateMachineConfig);
-      this.constructor._registerPopup(this);
+      CLASS._registerPopup(this);
     }
 
 
@@ -692,7 +724,7 @@
      */
 
     StateMachineBox.prototype.close = function(ignoreCallback) {
-      var self;
+      var base, self;
       if (ignoreCallback == null) {
         ignoreCallback = false;
       }
@@ -710,8 +742,8 @@
       });
       this.constructor._unregisterPopup(this);
       if (!ignoreCallback) {
-        if (typeof this.onClose === "function") {
-          this.onClose();
+        if (typeof (base = this.callbacks).onClose === "function") {
+          base.onClose();
         }
       }
       return this;
@@ -727,6 +759,8 @@
     StateMachineBox.prototype.remove = function() {
       return this.close.apply(this, arguments);
     };
+
+    StateMachineBox.prototype._animateSlide = function() {};
 
 
     /**
@@ -746,31 +780,15 @@
 
     StateMachineBox.prototype._changeContent = function(event, from, to) {
       var body, content;
-      body = $("<div class=\"body\" style=\"width: " + (this.bodyWidth - this.bodyPadding.left - this.bodyPadding.right) + "px;\" />");
       content = this.contents[to];
       if (content == null) {
-        throw new Error("StateMachineBox::_changeContent: No content given for '" + to + "'!");
+        if (DEBUG) {
+          throw new Error("StateMachineBox::_changeContent: No content given for '" + to + "'!");
+        }
+        return this;
       }
-      if (this.bodyWrapper == null) {
-        this.bodyWrapper = this.div.find(".bodyWrapper");
-      }
-      body.append(content);
-      if (event === "back") {
-        this.bodyWrapper.prepend(body).css("margin-left", "-" + this.bodyWidth + "px").animate({
-          "margin-left": "0px"
-        }, 400, "swing", function() {
-          $(this).children().eq(1).detach();
-          return true;
-        });
-      } else if (from !== "none") {
-        this.bodyWrapper.append(body).animate({
-          "margin-left": "-" + this.bodyWidth + "px"
-        }, 400, "swing", function() {
-          $(this).children().eq(0).detach();
-          $(this).css("margin-left", "0px");
-          return true;
-        });
-      }
+      body = $("<div class=\"body\" style=\"width: " + (this.bodyWidth - this.bodyPadding.left - this.bodyPadding.right) + "px;\" />");
+      this._animate(this.bodyWrapper, body, this.contents[this.current], content, event, from, to, this.callbacks.onAnimate);
       return this;
     };
 
@@ -820,9 +838,6 @@
         self._setAsActive();
         return true;
       });
-      this.navigation = this.div.find(".navigation");
-      this.loader = this.div.find(".loader");
-      this.footer = this.div.find(".footer");
       buttons = this.options.buttons || [];
       for (idx = j = 0, len = buttons.length; j < len; idx = ++j) {
         button = buttons[idx];
@@ -961,7 +976,7 @@
      */
 
     StateMachineBox.prototype.fireEvent = function() {
-      var e, name, params;
+      var base, e, name, params;
       name = arguments[0], params = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (this[name] instanceof Function) {
         if (DEBUG) {
@@ -979,8 +994,8 @@
         return this;
       }
       console.warn("StateStatePopup::fireEvent: There is no event called '" + name + "'! Use onFailure() to catch that!");
-      if (typeof this.onFailure === "function") {
-        this.onFailure(name);
+      if (typeof (base = this.callbacks).onFailure === "function") {
+        base.onFailure(name);
       }
       return this;
     };
@@ -995,7 +1010,7 @@
      */
 
     StateMachineBox.prototype.next = function() {
-      var event, foundEvents, j, len, ref;
+      var base, base1, event, foundEvents, j, len, ref;
       if (this.beforeNext instanceof Function && this.beforeNext() === false) {
         return this;
       }
@@ -1013,8 +1028,8 @@
       }
       if (foundEvents.length === 0) {
         console.warn("StateMachineBox::next: There is no event for '" + this.current + "'! Can't go any further! Use onFailure() to catch that!");
-        if (typeof this.onFailure === "function") {
-          this.onFailure("next");
+        if (typeof (base = this.callbacks).onFailure === "function") {
+          base.onFailure("next");
         }
         return this;
       }
@@ -1027,8 +1042,8 @@
         }
         return results;
       })()) + "]! Can't decide where to go! Use onFailure() to catch that!");
-      if (typeof this.onFailure === "function") {
-        this.onFailure("next");
+      if (typeof (base1 = this.callbacks).onFailure === "function") {
+        base1.onFailure("next");
       }
       return this;
     };
@@ -1044,7 +1059,7 @@
      */
 
     StateMachineBox.prototype.prev = function() {
-      var e;
+      var base, e;
       if (this.beforePrev instanceof Function && this.beforePrev() === false) {
         return this;
       }
@@ -1055,8 +1070,8 @@
         e = _error;
         console.warn("StateMachineBox::prev: Cannot go to 'prev' because no back route was defined! Define it with '{ name: 'back', from: 'prevState', to: 'returnState' }' ;) Use onFailure() to catch that!");
         console.warn(e);
-        if (typeof this.onFailure === "function") {
-          this.onFailure("prev");
+        if (typeof (base = this.callbacks).onFailure === "function") {
+          base.onFailure("prev");
         }
         return this;
       }
