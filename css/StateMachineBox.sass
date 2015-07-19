@@ -50,7 +50,10 @@ $bodyHeight: #{$bodyWrapperHeight - 20px}
                     width: 95%
             // see cursor style for draggable smb at bottom
 
-            .bodyWrapper
+
+
+
+            .bodyWrapper, .fader
                 box-sizing: border-box
                 display: table
                 height: calc(100% - #{$headerHeight + $footerHeight})
@@ -64,6 +67,13 @@ $bodyHeight: #{$bodyWrapperHeight - 20px}
                     height: calc(100% - 20px)
                     padding: 10px 40px 10px 40px
 
+            .fader
+                display: none
+                position: relative
+                top: calc(-100% + #{$headerHeight + $footerHeight})
+                width: 100%
+
+
             .navigation
                 bottom: $footerHeight
                 height: $navigationHeight
@@ -76,8 +86,10 @@ $bodyHeight: #{$bodyWrapperHeight - 20px}
                     display: inline-block
 
             .footer
+                bottom: 0px
                 height: $footerHeight
                 padding: 0px
+                position: absolute
                 width: 100%
 
                 .button

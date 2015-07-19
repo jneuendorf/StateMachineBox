@@ -29,6 +29,8 @@
     * @type Object
     *
      */
+    var FADE_THROUGH;
+
     StateMachineBox.MODES = {
       SINGLE: "single",
       MANY: "many"
@@ -128,11 +130,66 @@
 
     StateMachineBox._theme = StateMachineBox.THEMES.DEFAULT;
 
+    FADE_THROUGH = function(color, bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+      var self;
+      self = this;
+      fader.css("display", "block").animate({
+        "background-color": color
+      }, 200, "swing", function() {
+        return self.constructor.ANIMATIONS.NONE.call(self, bodyWrapper, body, fader, fromContent, toContent, event, from, to, function() {
+          return fader.animate({
+            "background-color": "transparent"
+          }, 200, "swing", function() {
+            fader.css("display", "none");
+            if (typeof callback === "function") {
+              callback();
+            }
+            return true;
+          });
+        });
+      });
+      return true;
+    };
+
+    FADE_THROUGH.COLOR = function(color) {
+      return function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+        return FADE_THROUGH.call(this, color, bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback);
+      };
+    };
+
+    FADE_THROUGH.WHITE = FADE_THROUGH.COLOR("#ffffff");
+
+    FADE_THROUGH.BLACK = FADE_THROUGH.COLOR("#000000");
+
+    FADE_THROUGH.THEME = function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+      var self;
+      self = this;
+      fader.css({
+        display: "block",
+        opacity: 0
+      }).animate({
+        opacity: 1
+      }, 200, "swing", function() {
+        return self.constructor.ANIMATIONS.NONE.call(self, bodyWrapper, body, fader, fromContent, toContent, event, from, to, function() {
+          return fader.animate({
+            opacity: 0
+          }, 200, "swing", function() {
+            fader.css("display", "none");
+            if (typeof callback === "function") {
+              callback();
+            }
+            return true;
+          });
+        });
+      });
+      return true;
+    };
+
     StateMachineBox.ANIMATIONS = {
-      SLIDE: function(bodyWrapper, body, fromContent, toContent, event, from, to, callback) {
+      SLIDE: function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
         body.append(toContent);
         if (event === "back") {
-          return bodyWrapper.prepend(body).css("margin-left", "-" + this.bodyWidth + "px").animate({
+          bodyWrapper.prepend(body).css("margin-left", "-" + this.bodyWidth + "px").animate({
             "margin-left": "0px"
           }, 400, "swing", function() {
             $(this).children().eq(1).detach();
@@ -142,7 +199,7 @@
             return true;
           });
         } else if (from !== "none") {
-          return bodyWrapper.append(body).animate({
+          bodyWrapper.append(body).animate({
             "margin-left": "-" + this.bodyWidth + "px"
           }, 400, "swing", function() {
             $(this).children().eq(0).detach();
@@ -153,15 +210,20 @@
             return true;
           });
         }
+        return true;
       },
-      FADE: "fade",
-      FADE_THROUGH: function(bodyWrapper, body, fromContent, toContent, event, from, to, color) {
-        if (color != null) {
-          return "fade_" + color;
+      FADE: function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+        return true;
+      },
+      FADE_THROUGH: FADE_THROUGH,
+      NONE: function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+        body.append(toContent);
+        bodyWrapper.find(".body").replaceWith(body);
+        if (typeof callback === "function") {
+          callback();
         }
-        return "fade";
-      },
-      NONE: "none"
+        return true;
+      }
     };
 
     StateMachineBox.ANIMATIONS.DEFAULT = StateMachineBox.ANIMATIONS.SLIDE;
@@ -176,7 +238,7 @@
     }
 
     StateMachineBox._$cache = {
-      popup: $("<div class=\"smb\">\n    <div class=\"positioner\">\n        <div class=\"content\">\n            <div class=\"loader\" />\n            <div class=\"header\">\n                <div class=\"headline smb_noselect\" />\n            </div>\n            <div class=\"bodyWrapper\" />\n            <div class=\"navigation\" />\n            <div class=\"footer\" />\n        </div>\n        <div class=\"close\" />\n    </div>\n</div>"),
+      popup: $("<div class=\"smb\">\n    <div class=\"positioner\">\n        <div class=\"content\">\n            <div class=\"loader\" />\n            <div class=\"header\">\n                <div class=\"headline smb_noselect\" />\n            </div>\n            <div class=\"bodyWrapper\" />\n            <div class=\"fader\" />\n            <div class=\"navigation\" />\n            <div class=\"footer\" />\n        </div>\n        <div class=\"close\" />\n    </div>\n</div>"),
       overlay: $("<div class=\"smb-overlay\" />"),
       buttons: {
         raw: $("<div class=\"button raw\" />"),
@@ -518,6 +580,7 @@
       this.div = CLASS._$cache.popup.clone().addClass(this.theme);
       this.overlay = CLASS._$cache.overlay.clone().addClass(this.theme);
       this.bodyWrapper = this.div.find(".bodyWrapper");
+      this.fader = this.div.find(".fader");
       this.navigation = this.div.find(".navigation");
       this.loader = this.div.find(".loader");
       this.footer = this.div.find(".footer");
@@ -760,8 +823,6 @@
       return this.close.apply(this, arguments);
     };
 
-    StateMachineBox.prototype._animateSlide = function() {};
-
 
     /**
     * This method hides the instance's ajax loader.
@@ -788,7 +849,7 @@
         return this;
       }
       body = $("<div class=\"body\" style=\"width: " + (this.bodyWidth - this.bodyPadding.left - this.bodyPadding.right) + "px;\" />");
-      this._animate(this.bodyWrapper, body, this.contents[this.current], content, event, from, to, this.callbacks.onAnimate);
+      this._animate(this.bodyWrapper, body, this.fader, this.contents[this.current], content, event, from, to, this.callbacks.onAnimate);
       return this;
     };
 

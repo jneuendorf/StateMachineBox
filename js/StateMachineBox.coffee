@@ -8,6 +8,117 @@
 *###
 class window.StateMachineBox
 
+    ############################################################################################################
+    ############################################################################################################
+    ############################################################################################################
+    # STATIC PROTECTED PROPERTIES
+
+    ###*
+    * This property saves the currently active StateMachineBox instance.
+    * @static
+    * @protected
+    * @property _activePopup
+    * @type StateMachineBox
+    *###
+    @_activePopup = null
+
+    ###*
+    * This property is the cache for all reused jquery elements.
+    * @static
+    * @protected
+    * @property _$cache
+    * @type Object
+    *###
+    @_$cache =
+        popup:      $ """<div class="smb">
+                            <div class="positioner">
+                                <div class="content">
+                                    <div class="loader" />
+                                    <div class="header">
+                                        <div class="headline smb_noselect" />
+                                    </div>
+                                    <div class="bodyWrapper" />
+                                    <div class="fader" />
+                                    <div class="navigation" />
+                                    <div class="footer" />
+                                </div>
+                                <div class="close" />
+                            </div>
+                        </div>"""
+        overlay:    $ """<div class="smb-overlay" />"""
+        buttons:
+            raw:    $ """<div class="button raw" />"""
+            ok:     $ """<div class="button ok" data-langkey="ok" />"""
+            cancel: $ """<div class="button cancel" data-langkey="cancel" />"""
+            next:   $ """<div class="button next" data-langkey="next" />"""
+            prev:   $ """<div class="button prev" data-langkey="prev" />"""
+
+    # only required for checking locale settings
+    if DEBUG
+        ###*
+        * This array lists all valid language keys.
+        * Based on the ISO language codes (https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
+        * @static
+        * @protected
+        * @property _languageKeys
+        * @type Array
+        *###
+        @_languageKeys = [
+            "aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az",
+            "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs",
+            "ca", "ce", "ch", "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz",
+            "ee", "el", "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr", "fy",
+            "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr", "ht", "hu", "hy", "hz",
+            "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it", "iu", "ja", "jv",
+            "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko", "kr", "ks", "ku", "kv", "kw", "ky",
+            "la", "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv",
+            "mg", "mh", "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my",
+            "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv", "ny", "oc", "oj", "om", "or", "os",
+            "pa", "pi", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "rw",
+            "sa", "sc", "sd", "se", "sg", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw",
+            "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw", "ty",
+            "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh", "yi", "yo", "za", "zh", "zu"
+
+            "en-gb", "en-us", "en-ca", "en-au"
+        ]
+        ###*
+        * This array lists all locale keys.
+        * @static
+        * @protected
+        * @property _localeKeys
+        * @type Array
+        *###
+        @_localeKeys = [
+            "ok"
+            "cancel"
+            "next"
+            "prev"
+        ]
+
+    ###*
+    * This array saves all instances of the StateMachineBox.
+    * @static
+    * @protected
+    * @property _popups
+    * @type Array
+    *###
+    @_popups = []
+
+    ###*
+    * This property defines the current theme of the StateMachineBox class.
+    * @static
+    * @protected
+    * @property _theme
+    * @type String
+    * @default THEMES.DEFAULT
+    *###
+    @_theme = null
+
+    ############################################################################################################
+    ############################################################################################################
+    ############################################################################################################
+    # STATIC PUBLIC PROPERTIES
+
     ###*
     * This property defines what modes the StateMachineBox class can have.
     * @final
@@ -19,13 +130,13 @@ class window.StateMachineBox
         SINGLE: "single"
         MANY:   "many"
     ###*
-    * This property defines the current mode of the StateMachineBox class.
+    * This property saves the current mode of the StateMachineBox class.
     * @static
     * @property MODE
     * @type String
     * @default MODES.SINGLE
     *###
-    @MODE = @MODES.SINGLE
+    @MODE = null
     ###*
     * This property defines how fast fade-in and fade-out animations are.
     * @static
@@ -67,6 +178,8 @@ class window.StateMachineBox
         PREV: () ->
             return @prev()
 
+    # TODO: let the themes take care of this!!
+    # nth child is supported in all major browsers, ie9+
     @BUTTON_COLORS = [
         "#222222"
         "#9FA39F"
@@ -82,19 +195,42 @@ class window.StateMachineBox
     *###
     @THEMES =
         DEFAULT: "smb-default"
-    ###*
-    * This property defines the current theme of the StateMachineBox class.
-    * @static
-    * @property _theme
-    * @type String
-    * @default THEMES.DEFAULT
-    *###
-    @_theme = @THEMES.DEFAULT
 
-    # ANIMATION FUNCTION
-    # NOTE: common api: (bodyWrapper, body, fromContent, toContent, event, from, to) ->
+    ############################################################################################################
+    # ANIMATION FUNCTIONS
+    # NOTE: 'this' is a StateMachineBox instance
+    FADE_THROUGH = (color, bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) ->
+        self = @
+        fader.css "display", "block"
+            .animate {"background-color": color}, 200, "swing", () ->
+                return self.constructor.ANIMATIONS.NONE.call self, bodyWrapper, body, fader, fromContent, toContent, event, from, to, () ->
+                    return fader.animate {"background-color": "transparent"}, 200, "swing", () ->
+                        fader.css "display", "none"
+                        callback?()
+                        return true
+        return true
+    FADE_THROUGH.COLOR = (color) ->
+        return (bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) ->
+            return FADE_THROUGH.call @, color, bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback
+    FADE_THROUGH.WHITE = FADE_THROUGH.COLOR("#ffffff")
+    FADE_THROUGH.BLACK = FADE_THROUGH.COLOR("#000000")
+    FADE_THROUGH.THEME = (bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) ->
+        self = @
+        fader.css {
+                display: "block"
+                opacity: 0
+            }
+            .animate {opacity: 1}, 200, "swing", () ->
+                return self.constructor.ANIMATIONS.NONE.call self, bodyWrapper, body, fader, fromContent, toContent, event, from, to, () ->
+                    return fader.animate {opacity: 0}, 200, "swing", () ->
+                        fader.css "display", "none"
+                        callback?()
+                        return true
+        return true
+
+    # common api: (bodyWrapper, body, fader, fromContent, toContent, event, from, to) ->
     @ANIMATIONS =
-        SLIDE: (bodyWrapper, body, fromContent, toContent, event, from, to, callback) ->
+        SLIDE: (bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) ->
             body.append toContent
 
             # animate backwards
@@ -130,69 +266,25 @@ class window.StateMachineBox
                             callback?()
                             return true
                     )
-        FADE:           "fade"
-        FADE_THROUGH:   (bodyWrapper, body, fromContent, toContent, event, from, to, color) ->
-            if color?
-                return "fade_#{color}"
-            return "fade"
-        NONE:           "none"
-    @ANIMATIONS.DEFAULT = @ANIMATIONS.SLIDE
+            return true
+        FADE: (bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) ->
+            # TODO
+            return true
+        FADE_THROUGH: FADE_THROUGH
+        NONE: (bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) ->
+            body.append toContent
 
-    @_popups        = []
-    @_activePopup   = null
-    # only required for checking locale settings
-    if DEBUG
-        @_localeKeys    = [
-            "ok"
-            "cancel"
-            "next"
-            "prev"
-        ]
-        # iso language codes (https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
-        @_languageKeys  = [
-            "aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az",
-            "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs",
-            "ca", "ce", "ch", "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz",
-            "ee", "el", "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr", "fy",
-            "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr", "ht", "hu", "hy", "hz",
-            "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it", "iu", "ja", "jv",
-            "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko", "kr", "ks", "ku", "kv", "kw", "ky",
-            "la", "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv",
-            "mg", "mh", "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my",
-            "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv", "ny", "oc", "oj", "om", "or", "os",
-            "pa", "pi", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "rw",
-            "sa", "sc", "sd", "se", "sg", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw",
-            "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw", "ty",
-            "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh", "yi", "yo", "za", "zh", "zu"
+            bodyWrapper.find(".body").detach()
+            bodyWrapper.append body
 
-            "en-gb", "en-us", "en-ca", "en-au"
-        ]
+            callback?()
 
-    @_$cache =
-        popup:      $ """<div class="smb">
-                            <div class="positioner">
-                                <div class="content">
-                                    <div class="loader" />
-                                    <div class="header">
-                                        <div class="headline smb_noselect" />
-                                    </div>
-                                    <div class="bodyWrapper" />
-                                    <div class="navigation" />
-                                    <div class="footer" />
-                                </div>
-                                <div class="close" />
-                            </div>
-                        </div>"""
-        overlay:    $ """<div class="smb-overlay" />"""
-        buttons:
-            raw:    $ """<div class="button raw" />"""
-            ok:     $ """<div class="button ok" data-langkey="ok" />"""
-            cancel: $ """<div class="button cancel" data-langkey="cancel" />"""
-            next:   $ """<div class="button next" data-langkey="next" />"""
-            prev:   $ """<div class="button prev" data-langkey="prev" />"""
+            return true
 
     @locale = {}
 
+    ############################################################################################################
+    ############################################################################################################
     ############################################################################################################
     # STATIC METHODS
     ###*
@@ -204,6 +296,12 @@ class window.StateMachineBox
     * @chainable
     *###
     @init: () ->
+        # set defaults
+        @_theme = @THEMES.DEFAULT
+        @ANIMATIONS.DEFAULT = @ANIMATIONS.SLIDE
+
+        @MODE = @MODES.SINGLE
+
         @setLocale "en", {
             ok:     "ok"
             cancel: "cancel"
@@ -384,7 +482,9 @@ class window.StateMachineBox
         @_popups = (p for p, i in @_popups when p isnt popup)
         return @
 
-    ############################################################################################################
+    #################################################################################################################
+    #################################################################################################################
+    #################################################################################################################
     # CONSTRUCTOR (+ PSEUDO CONSTRUCTORS)
     @new: (stateMachineConfig, headline, options = {}) ->
         return new @(stateMachineConfig, headline, options)
@@ -418,15 +518,18 @@ class window.StateMachineBox
         @data       =
             eventPath: []
         @_drawn     = false
+        @_active    = false
 
         @div        = CLASS._$cache.popup.clone().addClass(@theme)
         @overlay    = CLASS._$cache.overlay.clone().addClass(@theme)
 
         @bodyWrapper    = @div.find(".bodyWrapper")
+        @fader          = @div.find(".fader")
         @navigation     = @div.find(".navigation")
         @loader         = @div.find(".loader")
         @footer         = @div.find(".footer")
 
+        # PROCESS WIDTH, HEIGHT, LEFT AND TOP SETTINGS
         css     = {}
         if (width = options.width)? and (height = options.height)?
             width   = parseInt(width, 10)
@@ -455,10 +558,12 @@ class window.StateMachineBox
             if css.height? and css.height isnt "auto"
                 css.top = "calc(50% - #{height / 2}px)"
 
-        # apply css
+
         @div.css css
 
+
         # taken from Popup.sass.erb
+        # TODO: supply basic layout data for each theme
         @bodyWidth = parseFloat(@options.width) or 800
         @bodyPadding =
             top:    10
@@ -466,18 +571,8 @@ class window.StateMachineBox
             bottom: 10
             left:   40
 
-        @_active = false
 
-        # apply state machine to only this instance
-        stateMachineConfig.target = @
 
-        # indicates whether or not the state machine can be linearized:
-        #       state1.1
-        #       /       \
-        # initial       final
-        #       \       /
-        #       state1.2
-        # can also be made linear => 2 options => initial -> state1.1 -> final OR initial -> state1.2 -> final
 
         @stateMachineConfig = stateMachineConfig
         @contents           = {}
@@ -497,11 +592,44 @@ class window.StateMachineBox
             self.onChange?(event, from, to)
             return true
 
-        # go!
+        # apply state machine to only this instance
+        stateMachineConfig.target = @
         StateMachine.create stateMachineConfig
 
         # register popup for possible singleton behavior
         CLASS._registerPopup(@)
+
+    #################################################################################################################
+    #################################################################################################################
+    #################################################################################################################
+    # PROTECTED FUNCTIONS
+
+    ###*
+    * This method hides the instance's ajax loader.
+    * @protected
+    * @method _changeContent
+    * @param event {String}
+    * The name of the event which causes the content to change.
+    * @param from {String}
+    * The name of the state that we're coming from.
+    * @param to {String}
+    * The name of the state that we're going to.
+    * @return {StateMachineBox}
+    * @chainable
+    *###
+    _changeContent: (event, from, to) ->
+        content = @contents[to]
+
+        if not content?
+            if DEBUG
+                throw new Error("StateMachineBox::_changeContent: No content given for '#{to}'!")
+            return @
+
+        body = $ """<div class="body" style="width: #{@bodyWidth - @bodyPadding.left - @bodyPadding.right}px;" />"""
+
+        @_animate(@bodyWrapper, body, @fader, @contents[@current], content, event, from, to, @callbacks.onAnimate)
+
+        return @
 
     ###*
     * This method sets the current StateMachineBox instance as currently active.
@@ -513,6 +641,11 @@ class window.StateMachineBox
     _setAsActive: () ->
         @constructor._setActive(@)
         return @
+
+    #################################################################################################################
+    #################################################################################################################
+    #################################################################################################################
+    # PUBLIC FUNCTIONS
 
     ###*
     * This method show the instance's div.
@@ -627,40 +760,6 @@ class window.StateMachineBox
     *###
     remove: () ->
         return @close.apply(@, arguments)
-
-    _animateSlide: () ->
-
-    ###*
-    * This method hides the instance's ajax loader.
-    * @protected
-    * @method _changeContent
-    * @param event {String}
-    * The name of the event which causes the content to change.
-    * @param from {String}
-    * The name of the state that we're coming from.
-    * @param to {String}
-    * The name of the state that we're going to.
-    * @return {StateMachineBox}
-    * @chainable
-    *###
-    # TODO: different animations: slide, fade, fade through color, immediate
-    # TODO: or custom function called on the object
-    _changeContent: (event, from, to) ->
-        content = @contents[to]
-
-        if not content?
-            if DEBUG
-                throw new Error("StateMachineBox::_changeContent: No content given for '#{to}'!")
-            return @
-
-        body = $ """<div class="body" style="width: #{@bodyWidth - @bodyPadding.left - @bodyPadding.right}px;" />"""
-
-        # if not @bodyWrapper?
-        #     @bodyWrapper = @div.find(".bodyWrapper")
-
-        @_animate(@bodyWrapper, body, @contents[@current], content, event, from, to, @callbacks.onAnimate)
-
-        return @
 
     ###*
     * This method returns the content associated with the current state.
@@ -785,8 +884,6 @@ class window.StateMachineBox
                 .addClass "draggable"
         else if @constructor.MODE is @constructor.MODES.SINGLE
             @container.append @overlay.click () ->
-                # TODO due to styling the popup outest wrapper prevents clicking on overlay
-                console.log "asdfasdfasdf"
                 self.fireAction("cancel")
                 return true
 
@@ -892,34 +989,11 @@ class window.StateMachineBox
             @back()
             return @
         catch e
-            # TODO: try to find definite previous state
+            # TODO: try to find definite previous state (use data.eventPath)
             console.warn "StateMachineBox::prev: Cannot go to 'prev' because no back route was defined! Define it with '{ name: 'back', from: 'prevState', to: 'returnState' }' ;) Use onFailure() to catch that!"
             console.warn e
             @callbacks.onFailure?("prev")
             return @
-
-    # NOTE: this method should not be necessary because it semantically equals fireEvent...
-    # ###*
-    # * This method is a convenience method for fireEvent (just like next). The difference here is that the state machine has no direction so next and prev are indistinguishable. Therefore the state machine must have a 'back' event for all states that are supposed to allow prev.
-    # * Only if there is exactly 1 other state that has an event that changes to the current state, prev can be applied.
-    # * @method change
-    # * @param targetState {String}
-    # * @return {StateMachineBox}
-    # * @chainable
-    # *###
-    # change: (targetState) ->
-    #     if @beforeChange instanceof Function and @beforeChange(targetState) is false
-    #         return @
-    #
-    #     for event in @stateMachineConfig.events when event.from is @current and event.to is targetState
-    #         @fireEvent(event.name)
-    #         if @callbacks.onChange instanceof Function
-    #             @callbacks.onChange.call(@, event.from, targetState)
-    #         return @
-    #
-    #     console.warn "StateMachineBox::change: Cannot go to '#{targetState}' from '#{@current}'! Use onFailure() to catch that!"
-    #     @callbacks.onFailure?("change")
-    #     return @
 
 # set locale
 StateMachineBox.init()

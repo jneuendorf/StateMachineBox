@@ -26,18 +26,23 @@
           text-overflow: ellipsis;
           white-space: nowrap;
           width: 95%; }
-      .smb .positioner .content .bodyWrapper {
+      .smb .positioner .content .bodyWrapper, .smb .positioner .content .fader {
         box-sizing: border-box;
         display: table;
         height: calc(100% - 111px);
         overflow: hidden;
         padding: 0px;
         width: 4000px; }
-        .smb .positioner .content .bodyWrapper .body {
+        .smb .positioner .content .bodyWrapper .body, .smb .positioner .content .fader .body {
           display: table-cell;
           float: left;
           height: calc(100% - 20px);
           padding: 10px 40px 10px 40px; }
+      .smb .positioner .content .fader {
+        display: none;
+        position: relative;
+        top: calc(-100% + 111px);
+        width: 100%; }
       .smb .positioner .content .navigation {
         bottom: 35px;
         height: 25px;
@@ -48,8 +53,10 @@
           cursor: pointer;
           display: inline-block; }
       .smb .positioner .content .footer {
+        bottom: 0px;
         height: 35px;
         padding: 0px;
+        position: absolute;
         width: 100%; }
         .smb .positioner .content .footer .button {
           min-width: 120px;

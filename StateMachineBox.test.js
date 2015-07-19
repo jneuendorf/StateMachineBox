@@ -113,6 +113,7 @@
         ],
         width: "700px",
         height: "630px",
+        animation: StateMachineBox.ANIMATIONS.FADE_THROUGH.WHITE,
         callbacks: {
           onFailure: function(event) {
             console.warn(event);

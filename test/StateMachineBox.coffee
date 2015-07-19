@@ -67,6 +67,8 @@ describe "StateMachineBox", () ->
             # closeButtonAction: "cancel"
             width: "700px"
             height: "630px"
+            # animation: StateMachineBox.ANIMATIONS.NONE
+            animation: StateMachineBox.ANIMATIONS.FADE_THROUGH.WHITE
             # onClose: () ->
             #     startRendering(favIds, renderOptions, folderName)
             callbacks:
