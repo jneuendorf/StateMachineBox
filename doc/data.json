@@ -51,7 +51,80 @@
         {
             "file": "StateMachineBox.js",
             "line": 24,
-            "description": "This property defines what modes the StateMachineBox can have.",
+            "description": "This property saves the currently active StateMachineBox instance.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "property",
+            "name": "_activePopup",
+            "type": "StateMachineBox",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 37,
+            "description": "This property is the cache for all reused jquery elements.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "property",
+            "name": "_$cache",
+            "type": "Object",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 60,
+            "description": "This array lists all valid language keys.\nBased on the ISO language codes (https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "property",
+            "name": "_languageKeys",
+            "type": "Array",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 71,
+            "description": "This array lists all locale keys.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "property",
+            "name": "_localeKeys",
+            "type": "Array",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 83,
+            "description": "This array saves all instances of the StateMachineBox.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "property",
+            "name": "_popups",
+            "type": "Array",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 95,
+            "description": "This property defines the current theme of the StateMachineBox class.",
+            "static": 1,
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "property",
+            "name": "_theme",
+            "type": "String",
+            "default": "THEMES.DEFAULT",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 108,
+            "description": "This property defines what modes the StateMachineBox class can have.",
             "final": 1,
             "static": 1,
             "itemtype": "property",
@@ -61,7 +134,39 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 111,
+            "line": 123,
+            "description": "This property saves the current mode of the StateMachineBox class.",
+            "static": 1,
+            "itemtype": "property",
+            "name": "MODE",
+            "type": "String",
+            "default": "MODES.SINGLE",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 135,
+            "description": "This property defines how fast fade-in and fade-out animations are.",
+            "static": 1,
+            "itemtype": "property",
+            "name": "FADE_TIME",
+            "type": "Number",
+            "default": "180",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 192,
+            "description": "This property defines all themes.",
+            "static": 1,
+            "itemtype": "property",
+            "name": "THEMES",
+            "type": "Object",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 304,
             "description": "This method initializes the StateMachineBox class. For example the default locales are set.",
             "static": 1,
             "access": "public",
@@ -77,7 +182,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 138,
+            "line": 334,
             "description": "This method finds out which StateMachineBox instance is the front most.\nIt doesn't work if custom styles or css classes are set.",
             "static": 1,
             "access": "public",
@@ -92,7 +197,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 160,
+            "line": 356,
             "description": "This method finds out which StateMachineBox instance is the front most.\nIt doesn't work if custom styles or css classes are set.",
             "static": 1,
             "access": "protected",
@@ -115,7 +220,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 178,
+            "line": 374,
             "description": "This method returns the active StateMachineBox instance or the front most (if none are active).",
             "static": 1,
             "access": "protected",
@@ -130,7 +235,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 192,
+            "line": 388,
             "description": "This method sets the locale information for a specific language. This information will be updated in all StateMachineBox'es by default.",
             "static": 1,
             "access": "protected",
@@ -163,7 +268,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 243,
+            "line": 441,
             "description": "This method gets the locale value for a given language and and a given key. If no key is specified this method returns the data object for the given language.",
             "static": 1,
             "access": "protected",
@@ -190,7 +295,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 274,
+            "line": 472,
             "description": "This method can be used to remove unneeded locale data from the memory.",
             "static": 1,
             "itemtype": "method",
@@ -211,7 +316,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 298,
+            "line": 540,
             "description": "This method can be used to add a StateMachineBox to the list of registered instances.",
             "static": 1,
             "access": "protected",
@@ -234,7 +339,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 317,
+            "line": 559,
             "description": "This method can be used to remove a StateMachineBox from the list of registered instances.",
             "static": 1,
             "access": "protected",
@@ -257,152 +362,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 443,
-            "description": "This method sets the current StateMachineBox instance as currently active.",
-            "access": "protected",
-            "tagname": "",
-            "itemtype": "method",
-            "name": "_setAsActive",
-            "return": {
-                "description": "",
-                "type": "StateMachineBox"
-            },
-            "chainable": 1,
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 458,
-            "description": "This method show the instance's div.",
-            "itemtype": "method",
-            "name": "show",
-            "return": {
-                "description": "",
-                "type": "StateMachineBox"
-            },
-            "chainable": 1,
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 472,
-            "description": "This method hides the instance's div.",
-            "itemtype": "method",
-            "name": "hide",
-            "return": {
-                "description": "",
-                "type": "StateMachineBox"
-            },
-            "chainable": 1,
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 486,
-            "description": "This method shows the instance's overlay.",
-            "itemtype": "method",
-            "name": "showOverlay",
-            "return": {
-                "description": "",
-                "type": "StateMachineBox"
-            },
-            "chainable": 1,
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 500,
-            "description": "This method hides the instance's overlay.",
-            "itemtype": "method",
-            "name": "hideOverlay",
-            "return": {
-                "description": "",
-                "type": "StateMachineBox"
-            },
-            "chainable": 1,
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 514,
-            "description": "This method shows the instance's ajax loader.",
-            "itemtype": "method",
-            "name": "showLoader",
-            "return": {
-                "description": "",
-                "type": "StateMachineBox"
-            },
-            "chainable": 1,
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 528,
-            "description": "This method hides the instance's ajax loader.",
-            "itemtype": "method",
-            "name": "hideLoader",
-            "return": {
-                "description": "",
-                "type": "StateMachineBox"
-            },
-            "chainable": 1,
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 542,
-            "description": "This method triggers an action (one of StateMachineBox.ACTIONS).\nThose actions are a subset of all events.",
-            "itemtype": "method",
-            "name": "fireAction",
-            "params": [
-                {
-                    "name": "name",
-                    "description": "\nThe name of the action.",
-                    "type": "String"
-                },
-                {
-                    "name": "params...",
-                    "description": "\nOptional. Any parameter will be passed to the action.",
-                    "type": "Mixed"
-                }
-            ],
-            "return": {
-                "description": "",
-                "type": "Mixed"
-            },
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 568,
-            "description": "This method hides the instance's ajax loader.",
-            "itemtype": "method",
-            "name": "close",
-            "params": [
-                {
-                    "name": "ignoreCallback",
-                    "description": "\nOptional. Default is false. Indicates if the beforeClose and onClose callbacks will be called.",
-                    "type": "Boolean"
-                }
-            ],
-            "return": {
-                "description": "",
-                "type": "StateMachineBox"
-            },
-            "chainable": 1,
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 605,
-            "description": "Synonym for close.",
-            "itemtype": "method",
-            "name": "remove",
-            "class": "StateMachineBox"
-        },
-        {
-            "file": "StateMachineBox.js",
-            "line": 616,
+            "line": 706,
             "description": "This method hides the instance's ajax loader.",
             "access": "protected",
             "tagname": "",
@@ -434,7 +394,152 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 662,
+            "line": 736,
+            "description": "This method sets the current StateMachineBox instance as currently active.",
+            "access": "protected",
+            "tagname": "",
+            "itemtype": "method",
+            "name": "_setAsActive",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 751,
+            "description": "This method show the instance's div.",
+            "itemtype": "method",
+            "name": "show",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 765,
+            "description": "This method hides the instance's div.",
+            "itemtype": "method",
+            "name": "hide",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 779,
+            "description": "This method shows the instance's overlay.",
+            "itemtype": "method",
+            "name": "showOverlay",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 793,
+            "description": "This method hides the instance's overlay.",
+            "itemtype": "method",
+            "name": "hideOverlay",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 807,
+            "description": "This method shows the instance's ajax loader.",
+            "itemtype": "method",
+            "name": "showLoader",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 821,
+            "description": "This method hides the instance's ajax loader.",
+            "itemtype": "method",
+            "name": "hideLoader",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 835,
+            "description": "This method triggers an action (one of StateMachineBox.ACTIONS).\nThose actions are a subset of all events.",
+            "itemtype": "method",
+            "name": "fireAction",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "\nThe name of the action.",
+                    "type": "String"
+                },
+                {
+                    "name": "params...",
+                    "description": "\nOptional. Any parameter will be passed to the action.",
+                    "type": "Mixed"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Mixed"
+            },
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 861,
+            "description": "This method hides the instance's ajax loader.",
+            "itemtype": "method",
+            "name": "close",
+            "params": [
+                {
+                    "name": "ignoreCallback",
+                    "description": "\nOptional. Default is false. Indicates if the beforeClose and onClose callbacks will be called.",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 898,
+            "description": "Synonym for close.",
+            "itemtype": "method",
+            "name": "remove",
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 909,
             "description": "This method returns the content associated with the current state.",
             "itemtype": "method",
             "name": "currentContent",
@@ -447,7 +552,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 675,
+            "line": 926,
             "description": "This method draws the StateMachineBox instance to the DOM.",
             "itemtype": "method",
             "name": "draw",
@@ -460,8 +565,8 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 774,
-            "description": "This method redraws the StateMachineBox instance.\nThis does not actually redraw everything but resets the texts of elemnts containing locale data.",
+            "line": 1039,
+            "description": "This method redraws the StateMachineBox instance.\nThis does not actually redraw everything but resets the texts of elements containing locale data.",
             "itemtype": "method",
             "name": "redraw",
             "return": {
@@ -473,7 +578,20 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 795,
+            "line": 1060,
+            "description": "This method redraws the StateMachineBox instance.\nThis does not actually redraw everything but resets the theme css classes of the according elements.",
+            "itemtype": "method",
+            "name": "redraw",
+            "return": {
+                "description": "",
+                "type": "StateMachineBox"
+            },
+            "chainable": 1,
+            "class": "StateMachineBox"
+        },
+        {
+            "file": "StateMachineBox.js",
+            "line": 1077,
             "description": "This method triggers an event. If the event is invalid for the current state onFailure will be called.\nThis method might seem a bit unnecessary but implicit event function calls might appear weird and this method has better error reporting.",
             "itemtype": "method",
             "name": "fireEvent",
@@ -498,7 +616,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 823,
+            "line": 1116,
             "description": "This method is a convenience method for fireEvent. If the state allows only 1 event this method will trigger that event.",
             "itemtype": "method",
             "name": "next",
@@ -511,7 +629,7 @@
         },
         {
             "file": "StateMachineBox.js",
-            "line": 871,
+            "line": 1164,
             "description": "This method is a convenience method for fireEvent (just like next). The difference here is that the state machine has no direction so next and prev are indistinguishable. Therefore the state machine must have a 'back' event for all states that are supposed to allow prev.\nOnly if there is exactly 1 other state that has an event that changes to the current state, prev can be applied.",
             "itemtype": "method",
             "name": "prev",

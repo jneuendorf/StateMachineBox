@@ -22,6 +22,90 @@
   window.StateMachineBox = (function() {
 
     /**
+    * This property saves the currently active StateMachineBox instance.
+    * @static
+    * @protected
+    * @property _activePopup
+    * @type StateMachineBox
+    *
+     */
+    var FADE_THROUGH;
+
+    StateMachineBox._activePopup = null;
+
+
+    /**
+    * This property is the cache for all reused jquery elements.
+    * @static
+    * @protected
+    * @property _$cache
+    * @type Object
+    *
+     */
+
+    StateMachineBox._$cache = {
+      popup: $("<div class=\"smb\">\n    <div class=\"positioner\">\n        <div class=\"content\">\n            <div class=\"loader\" />\n            <div class=\"header\">\n                <div class=\"headline smb_noselect\" />\n            </div>\n            <div class=\"bodyWrapper\" />\n            <div class=\"fader\" />\n            <div class=\"navigation\" />\n            <div class=\"footer\" />\n        </div>\n        <div class=\"close\" />\n    </div>\n</div>"),
+      overlay: $("<div class=\"smb-overlay\" />"),
+      buttons: {
+        raw: $("<div class=\"button raw\" />"),
+        ok: $("<div class=\"button ok\" data-langkey=\"ok\" />"),
+        cancel: $("<div class=\"button cancel\" data-langkey=\"cancel\" />"),
+        next: $("<div class=\"button next\" data-langkey=\"next\" />"),
+        prev: $("<div class=\"button prev\" data-langkey=\"prev\" />")
+      }
+    };
+
+    if (DEBUG) {
+
+      /**
+      * This array lists all valid language keys.
+      * Based on the ISO language codes (https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
+      * @static
+      * @protected
+      * @property _languageKeys
+      * @type Array
+      *
+       */
+      StateMachineBox._languageKeys = ["aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az", "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs", "ca", "ce", "ch", "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz", "ee", "el", "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr", "fy", "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it", "iu", "ja", "jv", "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko", "kr", "ks", "ku", "kv", "kw", "ky", "la", "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv", "mg", "mh", "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my", "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv", "ny", "oc", "oj", "om", "or", "os", "pa", "pi", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "rw", "sa", "sc", "sd", "se", "sg", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw", "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw", "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh", "yi", "yo", "za", "zh", "zu", "en-gb", "en-us", "en-ca", "en-au"];
+
+      /**
+      * This array lists all locale keys.
+      * @static
+      * @protected
+      * @property _localeKeys
+      * @type Array
+      *
+       */
+      StateMachineBox._localeKeys = ["ok", "cancel", "next", "prev"];
+    }
+
+
+    /**
+    * This array saves all instances of the StateMachineBox.
+    * @static
+    * @protected
+    * @property _popups
+    * @type Array
+    *
+     */
+
+    StateMachineBox._popups = [];
+
+
+    /**
+    * This property defines the current theme of the StateMachineBox class.
+    * @static
+    * @protected
+    * @property _theme
+    * @type String
+    * @default THEMES.DEFAULT
+    *
+     */
+
+    StateMachineBox._theme = null;
+
+
+    /**
     * This property defines what modes the StateMachineBox class can have.
     * @final
     * @static
@@ -29,7 +113,6 @@
     * @type Object
     *
      */
-    var FADE_THROUGH;
 
     StateMachineBox.MODES = {
       SINGLE: "single",
@@ -38,7 +121,7 @@
 
 
     /**
-    * This property defines the current mode of the StateMachineBox class.
+    * This property saves the current mode of the StateMachineBox class.
     * @static
     * @property MODE
     * @type String
@@ -46,7 +129,7 @@
     *
      */
 
-    StateMachineBox.MODE = StateMachineBox.MODES.SINGLE;
+    StateMachineBox.MODE = null;
 
 
     /**
@@ -117,18 +200,6 @@
     StateMachineBox.THEMES = {
       DEFAULT: "smb-default"
     };
-
-
-    /**
-    * This property defines the current theme of the StateMachineBox class.
-    * @static
-    * @property _theme
-    * @type String
-    * @default THEMES.DEFAULT
-    *
-     */
-
-    StateMachineBox._theme = StateMachineBox.THEMES.DEFAULT;
 
     FADE_THROUGH = function(color, bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
       var self;
@@ -218,34 +289,12 @@
       FADE_THROUGH: FADE_THROUGH,
       NONE: function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
         body.append(toContent);
-        bodyWrapper.find(".body").replaceWith(body);
+        bodyWrapper.find(".body").detach();
+        bodyWrapper.append(body);
         if (typeof callback === "function") {
           callback();
         }
         return true;
-      }
-    };
-
-    StateMachineBox.ANIMATIONS.DEFAULT = StateMachineBox.ANIMATIONS.SLIDE;
-
-    StateMachineBox._popups = [];
-
-    StateMachineBox._activePopup = null;
-
-    if (DEBUG) {
-      StateMachineBox._localeKeys = ["ok", "cancel", "next", "prev"];
-      StateMachineBox._languageKeys = ["aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az", "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs", "ca", "ce", "ch", "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz", "ee", "el", "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr", "fy", "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it", "iu", "ja", "jv", "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko", "kr", "ks", "ku", "kv", "kw", "ky", "la", "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv", "mg", "mh", "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my", "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv", "ny", "oc", "oj", "om", "or", "os", "pa", "pi", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "rw", "sa", "sc", "sd", "se", "sg", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw", "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw", "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh", "yi", "yo", "za", "zh", "zu", "en-gb", "en-us", "en-ca", "en-au"];
-    }
-
-    StateMachineBox._$cache = {
-      popup: $("<div class=\"smb\">\n    <div class=\"positioner\">\n        <div class=\"content\">\n            <div class=\"loader\" />\n            <div class=\"header\">\n                <div class=\"headline smb_noselect\" />\n            </div>\n            <div class=\"bodyWrapper\" />\n            <div class=\"fader\" />\n            <div class=\"navigation\" />\n            <div class=\"footer\" />\n        </div>\n        <div class=\"close\" />\n    </div>\n</div>"),
-      overlay: $("<div class=\"smb-overlay\" />"),
-      buttons: {
-        raw: $("<div class=\"button raw\" />"),
-        ok: $("<div class=\"button ok\" data-langkey=\"ok\" />"),
-        cancel: $("<div class=\"button cancel\" data-langkey=\"cancel\" />"),
-        next: $("<div class=\"button next\" data-langkey=\"next\" />"),
-        prev: $("<div class=\"button prev\" data-langkey=\"prev\" />")
       }
     };
 
@@ -263,6 +312,9 @@
      */
 
     StateMachineBox.init = function() {
+      this._theme = this.THEMES.DEFAULT;
+      this.ANIMATIONS.DEFAULT = this.ANIMATIONS.SLIDE;
+      this.MODE = this.MODES.SINGLE;
       this.setLocale("en", {
         ok: "ok",
         cancel: "cancel",
@@ -577,6 +629,7 @@
         eventPath: []
       };
       this._drawn = false;
+      this._active = false;
       this.div = CLASS._$cache.popup.clone().addClass(this.theme);
       this.overlay = CLASS._$cache.overlay.clone().addClass(this.theme);
       this.bodyWrapper = this.div.find(".bodyWrapper");
@@ -617,8 +670,6 @@
         bottom: 10,
         left: 40
       };
-      this._active = false;
-      stateMachineConfig.target = this;
       this.stateMachineConfig = stateMachineConfig;
       this.contents = {};
       ref2 = stateMachineConfig.events;
@@ -646,9 +697,40 @@
         }
         return true;
       };
+      stateMachineConfig.target = this;
       StateMachine.create(stateMachineConfig);
       CLASS._registerPopup(this);
     }
+
+
+    /**
+    * This method hides the instance's ajax loader.
+    * @protected
+    * @method _changeContent
+    * @param event {String}
+    * The name of the event which causes the content to change.
+    * @param from {String}
+    * The name of the state that we're coming from.
+    * @param to {String}
+    * The name of the state that we're going to.
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
+    StateMachineBox.prototype._changeContent = function(event, from, to) {
+      var body, content;
+      content = this.contents[to];
+      if (content == null) {
+        if (DEBUG) {
+          throw new Error("StateMachineBox::_changeContent: No content given for '" + to + "'!");
+        }
+        return this;
+      }
+      body = $("<div class=\"body\" style=\"width: " + (this.bodyWidth - this.bodyPadding.left - this.bodyPadding.right) + "px;\" />");
+      this._animate(this.bodyWrapper, body, this.fader, this.contents[this.current], content, event, from, to, this.callbacks.onAnimate);
+      return this;
+    };
 
 
     /**
@@ -825,36 +907,6 @@
 
 
     /**
-    * This method hides the instance's ajax loader.
-    * @protected
-    * @method _changeContent
-    * @param event {String}
-    * The name of the event which causes the content to change.
-    * @param from {String}
-    * The name of the state that we're coming from.
-    * @param to {String}
-    * The name of the state that we're going to.
-    * @return {StateMachineBox}
-    * @chainable
-    *
-     */
-
-    StateMachineBox.prototype._changeContent = function(event, from, to) {
-      var body, content;
-      content = this.contents[to];
-      if (content == null) {
-        if (DEBUG) {
-          throw new Error("StateMachineBox::_changeContent: No content given for '" + to + "'!");
-        }
-        return this;
-      }
-      body = $("<div class=\"body\" style=\"width: " + (this.bodyWidth - this.bodyPadding.left - this.bodyPadding.right) + "px;\" />");
-      this._animate(this.bodyWrapper, body, this.fader, this.contents[this.current], content, event, from, to, this.callbacks.onAnimate);
-      return this;
-    };
-
-
-    /**
     * This method returns the content associated with the current state.
     * @method currentContent
     * @return {StateMachineBox}
@@ -974,7 +1026,6 @@
         }).addClass("draggable");
       } else if (this.constructor.MODE === this.constructor.MODES.SINGLE) {
         this.container.append(this.overlay.click(function() {
-          console.log("asdfasdfasdf");
           self.fireAction("cancel");
           return true;
         }));

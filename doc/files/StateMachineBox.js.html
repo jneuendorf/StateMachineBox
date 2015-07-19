@@ -103,23 +103,126 @@
   window.StateMachineBox = (function() {
 
     /**
-    * This property defines what modes the StateMachineBox can have.
+    * This property saves the currently active StateMachineBox instance.
+    * @static
+    * @protected
+    * @property _activePopup
+    * @type StateMachineBox
+    *
+     */
+    var FADE_THROUGH;
+
+    StateMachineBox._activePopup = null;
+
+
+    /**
+    * This property is the cache for all reused jquery elements.
+    * @static
+    * @protected
+    * @property _$cache
+    * @type Object
+    *
+     */
+
+    StateMachineBox._$cache = {
+      popup: $(&quot;&lt;div class=\&quot;smb\&quot;&gt;\n    &lt;div class=\&quot;positioner\&quot;&gt;\n        &lt;div class=\&quot;content\&quot;&gt;\n            &lt;div class=\&quot;loader\&quot; /&gt;\n            &lt;div class=\&quot;header\&quot;&gt;\n                &lt;div class=\&quot;headline smb_noselect\&quot; /&gt;\n            &lt;/div&gt;\n            &lt;div class=\&quot;bodyWrapper\&quot; /&gt;\n            &lt;div class=\&quot;fader\&quot; /&gt;\n            &lt;div class=\&quot;navigation\&quot; /&gt;\n            &lt;div class=\&quot;footer\&quot; /&gt;\n        &lt;/div&gt;\n        &lt;div class=\&quot;close\&quot; /&gt;\n    &lt;/div&gt;\n&lt;/div&gt;&quot;),
+      overlay: $(&quot;&lt;div class=\&quot;smb-overlay\&quot; /&gt;&quot;),
+      buttons: {
+        raw: $(&quot;&lt;div class=\&quot;button raw\&quot; /&gt;&quot;),
+        ok: $(&quot;&lt;div class=\&quot;button ok\&quot; data-langkey=\&quot;ok\&quot; /&gt;&quot;),
+        cancel: $(&quot;&lt;div class=\&quot;button cancel\&quot; data-langkey=\&quot;cancel\&quot; /&gt;&quot;),
+        next: $(&quot;&lt;div class=\&quot;button next\&quot; data-langkey=\&quot;next\&quot; /&gt;&quot;),
+        prev: $(&quot;&lt;div class=\&quot;button prev\&quot; data-langkey=\&quot;prev\&quot; /&gt;&quot;)
+      }
+    };
+
+    if (DEBUG) {
+
+      /**
+      * This array lists all valid language keys.
+      * Based on the ISO language codes (https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
+      * @static
+      * @protected
+      * @property _languageKeys
+      * @type Array
+      *
+       */
+      StateMachineBox._languageKeys = [&quot;aa&quot;, &quot;ab&quot;, &quot;ae&quot;, &quot;af&quot;, &quot;ak&quot;, &quot;am&quot;, &quot;an&quot;, &quot;ar&quot;, &quot;as&quot;, &quot;av&quot;, &quot;ay&quot;, &quot;az&quot;, &quot;ba&quot;, &quot;be&quot;, &quot;bg&quot;, &quot;bh&quot;, &quot;bi&quot;, &quot;bm&quot;, &quot;bn&quot;, &quot;bo&quot;, &quot;br&quot;, &quot;bs&quot;, &quot;ca&quot;, &quot;ce&quot;, &quot;ch&quot;, &quot;co&quot;, &quot;cr&quot;, &quot;cs&quot;, &quot;cu&quot;, &quot;cv&quot;, &quot;cy&quot;, &quot;da&quot;, &quot;de&quot;, &quot;dv&quot;, &quot;dz&quot;, &quot;ee&quot;, &quot;el&quot;, &quot;en&quot;, &quot;eo&quot;, &quot;es&quot;, &quot;et&quot;, &quot;eu&quot;, &quot;fa&quot;, &quot;ff&quot;, &quot;fi&quot;, &quot;fj&quot;, &quot;fo&quot;, &quot;fr&quot;, &quot;fy&quot;, &quot;ga&quot;, &quot;gd&quot;, &quot;gl&quot;, &quot;gn&quot;, &quot;gu&quot;, &quot;gv&quot;, &quot;ha&quot;, &quot;he&quot;, &quot;hi&quot;, &quot;ho&quot;, &quot;hr&quot;, &quot;ht&quot;, &quot;hu&quot;, &quot;hy&quot;, &quot;hz&quot;, &quot;ia&quot;, &quot;id&quot;, &quot;ie&quot;, &quot;ig&quot;, &quot;ii&quot;, &quot;ik&quot;, &quot;io&quot;, &quot;is&quot;, &quot;it&quot;, &quot;iu&quot;, &quot;ja&quot;, &quot;jv&quot;, &quot;ka&quot;, &quot;kg&quot;, &quot;ki&quot;, &quot;kj&quot;, &quot;kk&quot;, &quot;kl&quot;, &quot;km&quot;, &quot;kn&quot;, &quot;ko&quot;, &quot;kr&quot;, &quot;ks&quot;, &quot;ku&quot;, &quot;kv&quot;, &quot;kw&quot;, &quot;ky&quot;, &quot;la&quot;, &quot;lb&quot;, &quot;lg&quot;, &quot;li&quot;, &quot;ln&quot;, &quot;lo&quot;, &quot;lt&quot;, &quot;lu&quot;, &quot;lv&quot;, &quot;mg&quot;, &quot;mh&quot;, &quot;mi&quot;, &quot;mk&quot;, &quot;ml&quot;, &quot;mn&quot;, &quot;mr&quot;, &quot;ms&quot;, &quot;mt&quot;, &quot;my&quot;, &quot;na&quot;, &quot;nb&quot;, &quot;nd&quot;, &quot;ne&quot;, &quot;ng&quot;, &quot;nl&quot;, &quot;nn&quot;, &quot;no&quot;, &quot;nr&quot;, &quot;nv&quot;, &quot;ny&quot;, &quot;oc&quot;, &quot;oj&quot;, &quot;om&quot;, &quot;or&quot;, &quot;os&quot;, &quot;pa&quot;, &quot;pi&quot;, &quot;pl&quot;, &quot;ps&quot;, &quot;pt&quot;, &quot;qu&quot;, &quot;rm&quot;, &quot;rn&quot;, &quot;ro&quot;, &quot;ru&quot;, &quot;rw&quot;, &quot;sa&quot;, &quot;sc&quot;, &quot;sd&quot;, &quot;se&quot;, &quot;sg&quot;, &quot;si&quot;, &quot;sk&quot;, &quot;sl&quot;, &quot;sm&quot;, &quot;sn&quot;, &quot;so&quot;, &quot;sq&quot;, &quot;sr&quot;, &quot;ss&quot;, &quot;st&quot;, &quot;su&quot;, &quot;sv&quot;, &quot;sw&quot;, &quot;ta&quot;, &quot;te&quot;, &quot;tg&quot;, &quot;th&quot;, &quot;ti&quot;, &quot;tk&quot;, &quot;tl&quot;, &quot;tn&quot;, &quot;to&quot;, &quot;tr&quot;, &quot;ts&quot;, &quot;tt&quot;, &quot;tw&quot;, &quot;ty&quot;, &quot;ug&quot;, &quot;uk&quot;, &quot;ur&quot;, &quot;uz&quot;, &quot;ve&quot;, &quot;vi&quot;, &quot;vo&quot;, &quot;wa&quot;, &quot;wo&quot;, &quot;xh&quot;, &quot;yi&quot;, &quot;yo&quot;, &quot;za&quot;, &quot;zh&quot;, &quot;zu&quot;, &quot;en-gb&quot;, &quot;en-us&quot;, &quot;en-ca&quot;, &quot;en-au&quot;];
+
+      /**
+      * This array lists all locale keys.
+      * @static
+      * @protected
+      * @property _localeKeys
+      * @type Array
+      *
+       */
+      StateMachineBox._localeKeys = [&quot;ok&quot;, &quot;cancel&quot;, &quot;next&quot;, &quot;prev&quot;];
+    }
+
+
+    /**
+    * This array saves all instances of the StateMachineBox.
+    * @static
+    * @protected
+    * @property _popups
+    * @type Array
+    *
+     */
+
+    StateMachineBox._popups = [];
+
+
+    /**
+    * This property defines the current theme of the StateMachineBox class.
+    * @static
+    * @protected
+    * @property _theme
+    * @type String
+    * @default THEMES.DEFAULT
+    *
+     */
+
+    StateMachineBox._theme = null;
+
+
+    /**
+    * This property defines what modes the StateMachineBox class can have.
     * @final
     * @static
     * @property MODES
     * @type Object
     *
      */
+
     StateMachineBox.MODES = {
       SINGLE: &quot;single&quot;,
       MANY: &quot;many&quot;
     };
 
-    StateMachineBox.MODE = StateMachineBox.MODES.SINGLE;
+
+    /**
+    * This property saves the current mode of the StateMachineBox class.
+    * @static
+    * @property MODE
+    * @type String
+    * @default MODES.SINGLE
+    *
+     */
+
+    StateMachineBox.MODE = null;
+
+
+    /**
+    * This property defines how fast fade-in and fade-out animations are.
+    * @static
+    * @property FADE_TIME
+    * @type Number
+    * @default 180
+    *
+     */
 
     StateMachineBox.FADE_TIME = 180;
-
-    StateMachineBox.DEFAULT_CSS_CLASS = &quot;default&quot;;
 
     StateMachineBox.BUTTON_ACTIONS = {
       OK: &quot;CLOSE&quot;,
@@ -141,15 +244,15 @@
       },
       OK: function() {
         this.close(true);
-        if (this.onOk instanceof Function) {
-          this.onOk();
+        if (this.callbacks.onOk instanceof Function) {
+          this.callbacks.onOk();
         }
         return this;
       },
       CANCEL: function() {
         this.close(true);
-        if (this.onCancel instanceof Function) {
-          this.onCancel();
+        if (this.callbacks.onCancel instanceof Function) {
+          this.callbacks.onCancel();
         }
         return this;
       },
@@ -166,23 +269,113 @@
 
     StateMachineBox.BUTTON_COLORS = [&quot;#222222&quot;, &quot;#9FA39F&quot;, &quot;#B9BCB9&quot;, &quot;#D3D5D3&quot;];
 
-    StateMachineBox._popups = [];
 
-    StateMachineBox._activePopup = null;
+    /**
+    * This property defines all themes.
+    * @static
+    * @property THEMES
+    * @type Object
+    *
+     */
 
-    if (DEBUG) {
-      StateMachineBox._localeKeys = [&quot;ok&quot;, &quot;cancel&quot;, &quot;next&quot;, &quot;prev&quot;];
-      StateMachineBox._languageKeys = [&quot;aa&quot;, &quot;ab&quot;, &quot;ae&quot;, &quot;af&quot;, &quot;ak&quot;, &quot;am&quot;, &quot;an&quot;, &quot;ar&quot;, &quot;as&quot;, &quot;av&quot;, &quot;ay&quot;, &quot;az&quot;, &quot;ba&quot;, &quot;be&quot;, &quot;bg&quot;, &quot;bh&quot;, &quot;bi&quot;, &quot;bm&quot;, &quot;bn&quot;, &quot;bo&quot;, &quot;br&quot;, &quot;bs&quot;, &quot;ca&quot;, &quot;ce&quot;, &quot;ch&quot;, &quot;co&quot;, &quot;cr&quot;, &quot;cs&quot;, &quot;cu&quot;, &quot;cv&quot;, &quot;cy&quot;, &quot;da&quot;, &quot;de&quot;, &quot;dv&quot;, &quot;dz&quot;, &quot;ee&quot;, &quot;el&quot;, &quot;en&quot;, &quot;eo&quot;, &quot;es&quot;, &quot;et&quot;, &quot;eu&quot;, &quot;fa&quot;, &quot;ff&quot;, &quot;fi&quot;, &quot;fj&quot;, &quot;fo&quot;, &quot;fr&quot;, &quot;fy&quot;, &quot;ga&quot;, &quot;gd&quot;, &quot;gl&quot;, &quot;gn&quot;, &quot;gu&quot;, &quot;gv&quot;, &quot;ha&quot;, &quot;he&quot;, &quot;hi&quot;, &quot;ho&quot;, &quot;hr&quot;, &quot;ht&quot;, &quot;hu&quot;, &quot;hy&quot;, &quot;hz&quot;, &quot;ia&quot;, &quot;id&quot;, &quot;ie&quot;, &quot;ig&quot;, &quot;ii&quot;, &quot;ik&quot;, &quot;io&quot;, &quot;is&quot;, &quot;it&quot;, &quot;iu&quot;, &quot;ja&quot;, &quot;jv&quot;, &quot;ka&quot;, &quot;kg&quot;, &quot;ki&quot;, &quot;kj&quot;, &quot;kk&quot;, &quot;kl&quot;, &quot;km&quot;, &quot;kn&quot;, &quot;ko&quot;, &quot;kr&quot;, &quot;ks&quot;, &quot;ku&quot;, &quot;kv&quot;, &quot;kw&quot;, &quot;ky&quot;, &quot;la&quot;, &quot;lb&quot;, &quot;lg&quot;, &quot;li&quot;, &quot;ln&quot;, &quot;lo&quot;, &quot;lt&quot;, &quot;lu&quot;, &quot;lv&quot;, &quot;mg&quot;, &quot;mh&quot;, &quot;mi&quot;, &quot;mk&quot;, &quot;ml&quot;, &quot;mn&quot;, &quot;mr&quot;, &quot;ms&quot;, &quot;mt&quot;, &quot;my&quot;, &quot;na&quot;, &quot;nb&quot;, &quot;nd&quot;, &quot;ne&quot;, &quot;ng&quot;, &quot;nl&quot;, &quot;nn&quot;, &quot;no&quot;, &quot;nr&quot;, &quot;nv&quot;, &quot;ny&quot;, &quot;oc&quot;, &quot;oj&quot;, &quot;om&quot;, &quot;or&quot;, &quot;os&quot;, &quot;pa&quot;, &quot;pi&quot;, &quot;pl&quot;, &quot;ps&quot;, &quot;pt&quot;, &quot;qu&quot;, &quot;rm&quot;, &quot;rn&quot;, &quot;ro&quot;, &quot;ru&quot;, &quot;rw&quot;, &quot;sa&quot;, &quot;sc&quot;, &quot;sd&quot;, &quot;se&quot;, &quot;sg&quot;, &quot;si&quot;, &quot;sk&quot;, &quot;sl&quot;, &quot;sm&quot;, &quot;sn&quot;, &quot;so&quot;, &quot;sq&quot;, &quot;sr&quot;, &quot;ss&quot;, &quot;st&quot;, &quot;su&quot;, &quot;sv&quot;, &quot;sw&quot;, &quot;ta&quot;, &quot;te&quot;, &quot;tg&quot;, &quot;th&quot;, &quot;ti&quot;, &quot;tk&quot;, &quot;tl&quot;, &quot;tn&quot;, &quot;to&quot;, &quot;tr&quot;, &quot;ts&quot;, &quot;tt&quot;, &quot;tw&quot;, &quot;ty&quot;, &quot;ug&quot;, &quot;uk&quot;, &quot;ur&quot;, &quot;uz&quot;, &quot;ve&quot;, &quot;vi&quot;, &quot;vo&quot;, &quot;wa&quot;, &quot;wo&quot;, &quot;xh&quot;, &quot;yi&quot;, &quot;yo&quot;, &quot;za&quot;, &quot;zh&quot;, &quot;zu&quot;, &quot;en-gb&quot;, &quot;en-us&quot;, &quot;en-ca&quot;, &quot;en-au&quot;];
-    }
+    StateMachineBox.THEMES = {
+      DEFAULT: &quot;smb-default&quot;
+    };
 
-    StateMachineBox._$cache = {
-      popup: $(&quot;&lt;div class=\&quot;popup\&quot;&gt;\n    &lt;div class=\&quot;content\&quot;&gt;\n        &lt;div class=\&quot;close\&quot; /&gt;\n        &lt;div class=\&quot;loader\&quot; /&gt;\n        &lt;div class=\&quot;header\&quot;&gt;\n            &lt;div class=\&quot;headline\&quot; /&gt;\n        &lt;/div&gt;\n        &lt;div class=\&quot;bodyWrapper\&quot; /&gt;\n        &lt;div class=\&quot;navigation\&quot; /&gt;\n        &lt;div class=\&quot;footer\&quot; /&gt;\n    &lt;/div&gt;\n&lt;/div&gt;&quot;),
-      overlay: $(&quot;&lt;div class=\&quot;popup overlay\&quot; /&gt;&quot;),
-      buttons: {
-        ok: $(&quot;&lt;div class=\&quot;button ok\&quot; data-langkey=\&quot;ok\&quot; /&gt;&quot;),
-        cancel: $(&quot;&lt;div class=\&quot;button cancel\&quot; data-langkey=\&quot;cancel\&quot; /&gt;&quot;),
-        next: $(&quot;&lt;div class=\&quot;button next\&quot; data-langkey=\&quot;next\&quot; /&gt;&quot;),
-        prev: $(&quot;&lt;div class=\&quot;button prev\&quot; data-langkey=\&quot;prev\&quot; /&gt;&quot;)
+    FADE_THROUGH = function(color, bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+      var self;
+      self = this;
+      fader.css(&quot;display&quot;, &quot;block&quot;).animate({
+        &quot;background-color&quot;: color
+      }, 200, &quot;swing&quot;, function() {
+        return self.constructor.ANIMATIONS.NONE.call(self, bodyWrapper, body, fader, fromContent, toContent, event, from, to, function() {
+          return fader.animate({
+            &quot;background-color&quot;: &quot;transparent&quot;
+          }, 200, &quot;swing&quot;, function() {
+            fader.css(&quot;display&quot;, &quot;none&quot;);
+            if (typeof callback === &quot;function&quot;) {
+              callback();
+            }
+            return true;
+          });
+        });
+      });
+      return true;
+    };
+
+    FADE_THROUGH.COLOR = function(color) {
+      return function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+        return FADE_THROUGH.call(this, color, bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback);
+      };
+    };
+
+    FADE_THROUGH.WHITE = FADE_THROUGH.COLOR(&quot;#ffffff&quot;);
+
+    FADE_THROUGH.BLACK = FADE_THROUGH.COLOR(&quot;#000000&quot;);
+
+    FADE_THROUGH.THEME = function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+      var self;
+      self = this;
+      fader.css({
+        display: &quot;block&quot;,
+        opacity: 0
+      }).animate({
+        opacity: 1
+      }, 200, &quot;swing&quot;, function() {
+        return self.constructor.ANIMATIONS.NONE.call(self, bodyWrapper, body, fader, fromContent, toContent, event, from, to, function() {
+          return fader.animate({
+            opacity: 0
+          }, 200, &quot;swing&quot;, function() {
+            fader.css(&quot;display&quot;, &quot;none&quot;);
+            if (typeof callback === &quot;function&quot;) {
+              callback();
+            }
+            return true;
+          });
+        });
+      });
+      return true;
+    };
+
+    StateMachineBox.ANIMATIONS = {
+      SLIDE: function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+        body.append(toContent);
+        if (event === &quot;back&quot;) {
+          bodyWrapper.prepend(body).css(&quot;margin-left&quot;, &quot;-&quot; + this.bodyWidth + &quot;px&quot;).animate({
+            &quot;margin-left&quot;: &quot;0px&quot;
+          }, 400, &quot;swing&quot;, function() {
+            $(this).children().eq(1).detach();
+            if (typeof callback === &quot;function&quot;) {
+              callback();
+            }
+            return true;
+          });
+        } else if (from !== &quot;none&quot;) {
+          bodyWrapper.append(body).animate({
+            &quot;margin-left&quot;: &quot;-&quot; + this.bodyWidth + &quot;px&quot;
+          }, 400, &quot;swing&quot;, function() {
+            $(this).children().eq(0).detach();
+            $(this).css(&quot;margin-left&quot;, &quot;0px&quot;);
+            if (typeof callback === &quot;function&quot;) {
+              callback();
+            }
+            return true;
+          });
+        }
+        return true;
+      },
+      FADE: function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+        return true;
+      },
+      FADE_THROUGH: FADE_THROUGH,
+      NONE: function(bodyWrapper, body, fader, fromContent, toContent, event, from, to, callback) {
+        body.append(toContent);
+        bodyWrapper.find(&quot;.body&quot;).detach();
+        bodyWrapper.append(body);
+        if (typeof callback === &quot;function&quot;) {
+          callback();
+        }
+        return true;
       }
     };
 
@@ -200,6 +393,9 @@
      */
 
     StateMachineBox.init = function() {
+      this._theme = this.THEMES.DEFAULT;
+      this.ANIMATIONS.DEFAULT = this.ANIMATIONS.SLIDE;
+      this.MODE = this.MODES.SINGLE;
       this.setLocale(&quot;en&quot;, {
         ok: &quot;ok&quot;,
         cancel: &quot;cancel&quot;,
@@ -300,10 +496,12 @@
             }
           }
           this.locale[language] = values;
-          ref1 = this._popups;
-          for (k = 0, len1 = ref1.length; k &lt; len1; k++) {
-            popup = ref1[k];
-            popup.redraw();
+          if (redraw === true) {
+            ref1 = this._popups;
+            for (k = 0, len1 = ref1.length; k &lt; len1; k++) {
+              popup = ref1[k];
+              popup.redraw();
+            }
           }
           return this;
         }
@@ -375,6 +573,50 @@
       return this;
     };
 
+    StateMachineBox.addTheme = function(theme) {
+      if (DEBUG) {
+        if (this.THEMES[theme] == null) {
+          if (theme !== theme.toUpperCase()) {
+            console.warn(&quot;StateMachineBox.addTheme: For consistency it is recommended to use upper case theme names. Theme &#x27;&quot; + theme + &quot;&#x27; will be set anyways.&quot;);
+          }
+          this.THEMES[theme] = theme;
+        }
+        throw new Error(&quot;StateMachineBox.addTheme: Theme &#x27;&quot; + theme + &quot;&#x27; already exists!&quot;);
+      }
+      this.THEMES[theme] = theme;
+      return this;
+    };
+
+    StateMachineBox.setTheme = function(theme, redraw) {
+      var j, k, len, len1, popup, ref, ref1;
+      if (redraw == null) {
+        redraw = true;
+      }
+      if (DEBUG) {
+        if (this.THEMES[theme] != null) {
+          this._theme = this.THEMES[theme];
+          if (redraw === true) {
+            ref = this._popups;
+            for (j = 0, len = ref.length; j &lt; len; j++) {
+              popup = ref[j];
+              popup.setTheme(this._theme);
+            }
+          }
+          return this;
+        }
+        throw new Error(&quot;StateMachineBox.setTheme: Invalid theme &#x27;&quot; + theme + &quot;&#x27; given!&quot;);
+      }
+      this._theme = this.THEMES[theme];
+      if (redraw === true) {
+        ref1 = this._popups;
+        for (k = 0, len1 = ref1.length; k &lt; len1; k++) {
+          popup = ref1[k];
+          popup.setTheme(this._theme);
+        }
+      }
+      return this;
+    };
+
 
     /**
     * This method can be used to add a StateMachineBox to the list of registered instances.
@@ -431,7 +673,7 @@
     };
 
     function StateMachineBox(stateMachineConfig, headline, options) {
-      var callback, callbackName, event, j, k, len, len1, ref, ref1, ref2, self;
+      var CLASS, callback, callbackName, css, event, height, j, k, len, len1, ref, ref1, ref2, self, width;
       if (options == null) {
         options = {};
       }
@@ -454,34 +696,54 @@
           }
         }
       }
+      CLASS = this.constructor;
       this.headline = headline;
       this.options = options;
       this.closeButtonAction = options.closeButtonAction || &quot;close&quot;;
-      this.onClose = options.onClose;
-      this.onOk = options.onOk;
-      this.onCancel = options.onCancel;
-      this.onNext = options.onNext;
-      this.onPrev = options.onPrev;
-      this.onChange = options.onChange;
-      this.beforeClose = options.beforeClose;
-      this.beforeNext = options.beforeNext;
-      this.beforePrev = options.beforePrev;
-      this.beforeChange = options.beforeChange;
-      this.onFailure = options.onFailure;
-      this.theme = options.theme || &quot;default&quot;;
+      this.callbacks = options.callbacks || {};
+      this.theme = options.theme || CLASS.THEMES.DEFAULT;
       this.locale = options.locale || &quot;en&quot;;
       this.showNavigation = options.showNavigation || false;
       this.container = options.container || $(document.body);
-      this.data = {};
-      this.div = this.constructor._$cache.popup.clone();
-      this.overlay = this.constructor._$cache.overlay.clone();
-      if ((options.width != null) &amp;&amp; (options.height != null)) {
-        this.div.css({
-          width: options.width,
-          height: options.height
-        });
+      this._animate = options.animation || CLASS.ANIMATIONS.DEFAULT;
+      this.data = {
+        eventPath: []
+      };
+      this._drawn = false;
+      this._active = false;
+      this.div = CLASS._$cache.popup.clone().addClass(this.theme);
+      this.overlay = CLASS._$cache.overlay.clone().addClass(this.theme);
+      this.bodyWrapper = this.div.find(&quot;.bodyWrapper&quot;);
+      this.fader = this.div.find(&quot;.fader&quot;);
+      this.navigation = this.div.find(&quot;.navigation&quot;);
+      this.loader = this.div.find(&quot;.loader&quot;);
+      this.footer = this.div.find(&quot;.footer&quot;);
+      css = {};
+      if (((width = options.width) != null) &amp;&amp; ((height = options.height) != null)) {
+        width = parseInt(width, 10);
+        height = parseInt(height, 10);
+        if (isNaN(width)) {
+          css.width = &quot;auto&quot;;
+        } else {
+          css.width = width + &quot;px&quot;;
+        }
+        if (isNaN(height)) {
+          css.height = &quot;auto&quot;;
+        } else {
+          css.height = height + &quot;px&quot;;
+        }
       }
-      this.loader = null;
+      if (!options.left) {
+        if ((css.width != null) &amp;&amp; css.width !== &quot;auto&quot;) {
+          css.left = &quot;calc(50% - &quot; + (width / 2) + &quot;px)&quot;;
+        }
+      }
+      if (!options.top) {
+        if ((css.height != null) &amp;&amp; css.height !== &quot;auto&quot;) {
+          css.top = &quot;calc(50% - &quot; + (height / 2) + &quot;px)&quot;;
+        }
+      }
+      this.div.css(css);
       this.bodyWidth = parseFloat(this.options.width) || 800;
       this.bodyPadding = {
         top: 10,
@@ -489,10 +751,7 @@
         bottom: 10,
         left: 40
       };
-      this._active = false;
-      stateMachineConfig.target = this;
       this.stateMachineConfig = stateMachineConfig;
-      this.bodyWrapper = null;
       this.contents = {};
       ref2 = stateMachineConfig.events;
       for (k = 0, len1 = ref2.length; k &lt; len1; k++) {
@@ -513,12 +772,46 @@
           return false;
         }
         self._changeContent(event, from, to);
-        self.onChange(event, from, to);
+        self.data.eventPath.push(event);
+        if (typeof self.onChange === &quot;function&quot;) {
+          self.onChange(event, from, to);
+        }
         return true;
       };
+      stateMachineConfig.target = this;
       StateMachine.create(stateMachineConfig);
-      this.constructor._registerPopup(this);
+      CLASS._registerPopup(this);
     }
+
+
+    /**
+    * This method hides the instance&#x27;s ajax loader.
+    * @protected
+    * @method _changeContent
+    * @param event {String}
+    * The name of the event which causes the content to change.
+    * @param from {String}
+    * The name of the state that we&#x27;re coming from.
+    * @param to {String}
+    * The name of the state that we&#x27;re going to.
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
+    StateMachineBox.prototype._changeContent = function(event, from, to) {
+      var body, content;
+      content = this.contents[to];
+      if (content == null) {
+        if (DEBUG) {
+          throw new Error(&quot;StateMachineBox::_changeContent: No content given for &#x27;&quot; + to + &quot;&#x27;!&quot;);
+        }
+        return this;
+      }
+      body = $(&quot;&lt;div class=\&quot;body\&quot; style=\&quot;width: &quot; + (this.bodyWidth - this.bodyPadding.left - this.bodyPadding.right) + &quot;px;\&quot; /&gt;&quot;);
+      this._animate(this.bodyWrapper, body, this.fader, this.contents[this.current], content, event, from, to, this.callbacks.onAnimate);
+      return this;
+    };
 
 
     /**
@@ -657,7 +950,7 @@
      */
 
     StateMachineBox.prototype.close = function(ignoreCallback) {
-      var self;
+      var base, self;
       if (ignoreCallback == null) {
         ignoreCallback = false;
       }
@@ -675,8 +968,8 @@
       });
       this.constructor._unregisterPopup(this);
       if (!ignoreCallback) {
-        if (typeof this.onClose === &quot;function&quot;) {
-          this.onClose();
+        if (typeof (base = this.callbacks).onClose === &quot;function&quot;) {
+          base.onClose();
         }
       }
       return this;
@@ -695,52 +988,6 @@
 
 
     /**
-    * This method hides the instance&#x27;s ajax loader.
-    * @protected
-    * @method _changeContent
-    * @param event {String}
-    * The name of the event which causes the content to change.
-    * @param from {String}
-    * The name of the state that we&#x27;re coming from.
-    * @param to {String}
-    * The name of the state that we&#x27;re going to.
-    * @return {StateMachineBox}
-    * @chainable
-    *
-     */
-
-    StateMachineBox.prototype._changeContent = function(event, from, to) {
-      var body, content;
-      body = $(&quot;&lt;div class=\&quot;body\&quot; style=\&quot;width: &quot; + (this.bodyWidth - this.bodyPadding.left - this.bodyPadding.right) + &quot;px;\&quot; /&gt;&quot;);
-      content = this.contents[to];
-      if (content == null) {
-        throw new Error(&quot;StateMachineBox::_changeContent: No content given for &#x27;&quot; + to + &quot;&#x27;!&quot;);
-      }
-      if (this.bodyWrapper == null) {
-        this.bodyWrapper = this.div.find(&quot;.bodyWrapper&quot;);
-      }
-      body.append(content);
-      if (event === &quot;back&quot;) {
-        this.bodyWrapper.prepend(body).css(&quot;margin-left&quot;, &quot;-&quot; + this.bodyWidth + &quot;px&quot;).animate({
-          &quot;margin-left&quot;: &quot;0px&quot;
-        }, 400, &quot;swing&quot;, function() {
-          $(this).children().eq(1).detach();
-          return true;
-        });
-      } else if (from !== &quot;none&quot;) {
-        this.bodyWrapper.append(body).animate({
-          &quot;margin-left&quot;: &quot;-&quot; + this.bodyWidth + &quot;px&quot;
-        }, 400, &quot;swing&quot;, function() {
-          $(this).children().eq(0).detach();
-          $(this).css(&quot;margin-left&quot;, &quot;0px&quot;);
-          return true;
-        });
-      }
-      return this;
-    };
-
-
-    /**
     * This method returns the content associated with the current state.
     * @method currentContent
     * @return {StateMachineBox}
@@ -750,6 +997,10 @@
 
     StateMachineBox.prototype.currentContent = function() {
       return this.contents[this.current];
+    };
+
+    StateMachineBox.prototype.getLocale = function(key) {
+      return this.constructor.getLocale(this.locale, key);
     };
 
 
@@ -762,18 +1013,17 @@
      */
 
     StateMachineBox.prototype.draw = function() {
-      var action, b, body, button, buttons, content, headlineDiv, idx, j, lastColor, len, self;
+      var action, b, body, button, buttons, content, event, eventName, idx, j, lastColor, len, self;
       if (this.constructor.MODE === this.constructor.MODES.SINGLE &amp;&amp; (this.constructor.getActive() != null)) {
         console.warn(&quot;Popup::draw: tried to draw more than 1 popup but mode is set to &#x27;single&#x27;!&quot;);
         return this;
       }
-      self = this;
-      if (this.headline) {
-        headlineDiv = &quot;&lt;div class=\&quot;header companyBGColor\&quot;&gt;\n    &lt;div class=\&quot;headline noselect\&quot;&gt;&quot; + this.headline + &quot;&lt;/div&gt;\n&lt;/div&gt;&quot;;
-      } else {
-        headlineDiv = &quot;&quot;;
+      if (this._drawn === true) {
+        console.warn(&quot;Popup::draw: tried to draw same StateMachineBox instance more than once!&quot;);
+        return this;
       }
-      this.div.empty().append(&quot;&lt;div class=\&quot;content\&quot;&gt;\n    &lt;div class=\&quot;close\&quot; /&gt;\n    &lt;div class=\&quot;loader\&quot; /&gt;\n    &quot; + headlineDiv + &quot;\n    &lt;div class=\&quot;bodyWrapper\&quot; /&gt;\n    &lt;div class=\&quot;navigation\&quot; /&gt;\n    &lt;div class=\&quot;footer\&quot; /&gt;\n&lt;/div&gt;&quot;);
+      self = this;
+      this.div.find(&quot;.headline&quot;).append(this.headline);
       this.div.find(&quot;.overlay, .close&quot;).click(function() {
         self.fireAction(self.closeButtonAction);
         return true;
@@ -782,9 +1032,6 @@
         self._setAsActive();
         return true;
       });
-      this.navigation = this.div.find(&quot;.navigation&quot;);
-      this.loader = this.div.find(&quot;.loader&quot;);
-      this.footer = this.div.find(&quot;.footer&quot;);
       buttons = this.options.buttons || [];
       for (idx = j = 0, len = buttons.length; j &lt; len; idx = ++j) {
         button = buttons[idx];
@@ -793,33 +1040,51 @@
         }
         action = null;
         if (typeof button === &quot;string&quot;) {
-          b = button.toUpperCase();
+          b = button.toLowerCase();
           button = this.constructor._$cache.buttons[b].clone();
-          action = this.constructor.ACTIONS[this.constructor.BUTTON_ACTIONS[b]];
+          event = this.constructor.ACTIONS[this.constructor.BUTTON_ACTIONS[b]];
+          eventName = b;
         } else if ((button.button != null) &amp;&amp; (button.action != null)) {
           b = button;
-          button = this.constructor._$cache.buttons[b.button.toUpperCase()].clone();
-          action = this.constructor.ACTIONS[b.action.toUpperCase()];
+          button = this.constructor._$cache.buttons[b.button.toLowerCase()].clone();
+          event = this.constructor.ACTIONS[b.action.toLowerCase()];
+          eventName = b.action.toLowerCase();
+        } else if ((button.event != null) &amp;&amp; (button.label != null)) {
+          if (DEBUG) {
+            if (this[button.event] == null) {
+              console.warn(&quot;StateMachineBox::draw: Invalid button configuration for StateMachineBox! Invalid button event &#x27;&quot; + eventName + &quot;&#x27;!&quot;, this.options.buttons);
+              continue;
+            }
+          }
+          b = button;
+          button = this.constructor._$cache.buttons.raw.clone();
+          if (b.locale === true) {
+            button.text(this.getLocale(b.label));
+          } else {
+            button.text(b.label);
+          }
+          event = this[b.event];
+          eventName = b.event;
         } else if (DEBUG) {
           button = null;
         }
         if (DEBUG) {
           if (button == null) {
-            console.warn(&quot;Invalid button configuration for Popup!&quot;, this.options.buttons);
+            console.warn(&quot;StateMachineBox::draw: Invalid button configuration for StateMachineBox!&quot;, this.options.buttons);
             continue;
           }
         }
-        if (action != null) {
+        if (event != null) {
           lastColor = this.constructor.BUTTON_COLORS[idx];
           button.css({
             &quot;background-color&quot;: lastColor
           });
-          (function(action) {
+          (function(eventName) {
             return button.click(function() {
-              action.call(self);
+              self.fireEvent(eventName);
               return true;
             });
-          })(action);
+          })(eventName);
           this.footer.append(button);
         }
       }
@@ -854,7 +1119,7 @@
 
     /**
     * This method redraws the StateMachineBox instance.
-    * This does not actually redraw everything but resets the texts of elemnts containing locale data.
+    * This does not actually redraw everything but resets the texts of elements containing locale data.
     * @method redraw
     * @return {StateMachineBox}
     * @chainable
@@ -874,6 +1139,23 @@
 
 
     /**
+    * This method redraws the StateMachineBox instance.
+    * This does not actually redraw everything but resets the theme css classes of the according elements.
+    * @method redraw
+    * @return {StateMachineBox}
+    * @chainable
+    *
+     */
+
+    StateMachineBox.prototype.setTheme = function(theme) {
+      if (this.theme !== theme) {
+        this.div.find(&quot;.&quot; + this.theme).removeClass(this.theme).addClass(theme);
+      }
+      return this;
+    };
+
+
+    /**
     * This method triggers an event. If the event is invalid for the current state onFailure will be called.
     * This method might seem a bit unnecessary but implicit event function calls might appear weird and this method has better error reporting.
     * @method fireEvent
@@ -887,15 +1169,26 @@
      */
 
     StateMachineBox.prototype.fireEvent = function() {
-      var name, params;
+      var base, e, name, params;
       name = arguments[0], params = 2 &lt;= arguments.length ? slice.call(arguments, 1) : [];
       if (this[name] instanceof Function) {
+        if (DEBUG) {
+          try {
+            this[name].apply(this, params);
+          } catch (_error) {
+            e = _error;
+            console.warn(&quot;StateStatePopup::fireEvent: Event &#x27;&quot; + name + &quot;&#x27; is invalid for current state!&quot;);
+            throw e;
+          } finally {
+            return this;
+          }
+        }
         this[name].apply(this, params);
         return this;
       }
       console.warn(&quot;StateStatePopup::fireEvent: There is no event called &#x27;&quot; + name + &quot;&#x27;! Use onFailure() to catch that!&quot;);
-      if (typeof this.onFailure === &quot;function&quot;) {
-        this.onFailure(name);
+      if (typeof (base = this.callbacks).onFailure === &quot;function&quot;) {
+        base.onFailure(name);
       }
       return this;
     };
@@ -910,7 +1203,7 @@
      */
 
     StateMachineBox.prototype.next = function() {
-      var event, foundEvents, j, len, ref;
+      var base, base1, event, foundEvents, j, len, ref;
       if (this.beforeNext instanceof Function &amp;&amp; this.beforeNext() === false) {
         return this;
       }
@@ -928,8 +1221,8 @@
       }
       if (foundEvents.length === 0) {
         console.warn(&quot;StateMachineBox::next: There is no event for &#x27;&quot; + this.current + &quot;&#x27;! Can&#x27;t go any further! Use onFailure() to catch that!&quot;);
-        if (typeof this.onFailure === &quot;function&quot;) {
-          this.onFailure(&quot;next&quot;);
+        if (typeof (base = this.callbacks).onFailure === &quot;function&quot;) {
+          base.onFailure(&quot;next&quot;);
         }
         return this;
       }
@@ -942,8 +1235,8 @@
         }
         return results;
       })()) + &quot;]! Can&#x27;t decide where to go! Use onFailure() to catch that!&quot;);
-      if (typeof this.onFailure === &quot;function&quot;) {
-        this.onFailure(&quot;next&quot;);
+      if (typeof (base1 = this.callbacks).onFailure === &quot;function&quot;) {
+        base1.onFailure(&quot;next&quot;);
       }
       return this;
     };
@@ -959,7 +1252,7 @@
      */
 
     StateMachineBox.prototype.prev = function() {
-      var e;
+      var base, e;
       if (this.beforePrev instanceof Function &amp;&amp; this.beforePrev() === false) {
         return this;
       }
@@ -970,8 +1263,8 @@
         e = _error;
         console.warn(&quot;StateMachineBox::prev: Cannot go to &#x27;prev&#x27; because no back route was defined! Define it with &#x27;{ name: &#x27;back&#x27;, from: &#x27;prevState&#x27;, to: &#x27;returnState&#x27; }&#x27; ;) Use onFailure() to catch that!&quot;);
         console.warn(e);
-        if (typeof this.onFailure === &quot;function&quot;) {
-          this.onFailure(&quot;prev&quot;);
+        if (typeof (base = this.callbacks).onFailure === &quot;function&quot;) {
+          base.onFailure(&quot;prev&quot;);
         }
         return this;
       }
